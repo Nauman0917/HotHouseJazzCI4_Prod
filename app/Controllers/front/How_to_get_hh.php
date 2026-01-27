@@ -123,7 +123,7 @@ if ($request->getPost('Savesubsc')) {
 		];
 
 		// ✅ MailChimp API Configuration
-		$api_key = 'getenv('MAILCHIMP_API_KEY')'; // Your API Key
+		$api_key = getenv('MAILCHIMP_API_KEY'); // Your API Key
 		$server = 'us3.'; // Extracted from API key
 		$list_id = 'f15ad682db'; // Your List ID
 		$auth = base64_encode('user:' . $api_key);

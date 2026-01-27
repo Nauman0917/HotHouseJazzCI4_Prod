@@ -309,7 +309,7 @@ class Submit_festival extends BaseController
                 $first_name = $param['name'];
                 $last_name = '';
 
-                $api_key = 'getenv('MAILCHIMP_API_KEY')';
+                $api_key = getenv('MAILCHIMP_API_KEY');
                 $server = 'us3.';
                 $list_id = 'f15ad682db';
                 $auth = base64_encode('user:' . $api_key);

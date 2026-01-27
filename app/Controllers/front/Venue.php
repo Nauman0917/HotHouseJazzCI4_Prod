@@ -105,7 +105,7 @@ $data['seo_section'] 		= 	$this->common_model->getData('single', $tbl6,$where6);
                 $first_name = $param['name'];
                 $last_name = '';
                 
-                $api_key = 'getenv('MAILCHIMP_API_KEY')'; // YOUR API KEY
+                $api_key = getenv('MAILCHIMP_API_KEY'); // YOUR API KEY
                 
                 // server name followed by a dot. 
                 // We use us13 because us13 is present in API KEY
