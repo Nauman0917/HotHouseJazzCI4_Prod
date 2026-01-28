@@ -1,4 +1,10 @@
-var geocodingClient = mapboxSdk({accessToken: 'pk.eyJ1IjoiYWxnb3NvZnRtYW5vaiIsImEiOiJjazlzbzh1YWkxNmJ1M2dxaDA4eHo1aWg3In0.ktk7NRGkg1eJeQ0iK97XBg'});
+var geocodingClient = mapboxSdk({ accessToken: window.MAPBOX_ACCESS_TOKEN });
+
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
 function autocompleteSuggestionMapBoxAPI(inputParams, callback) {
     geocodingClient.geocoding.forwardGeocode({
@@ -6,7 +12,7 @@ function autocompleteSuggestionMapBoxAPI(inputParams, callback) {
         //countries: ['In'],
         autocomplete: true,
         limit: 5,
-        types: ['country','locality','region','place'],
+        types: ['country', 'locality', 'region', 'place'],
     })
         .send()
         .then(response => {
@@ -16,7 +22,7 @@ function autocompleteSuggestionMapBoxAPI(inputParams, callback) {
 }
 
 function autocompleteInputBox(inp) {
-	var currentFocus;
+    var currentFocus;
     inp.addEventListener("input", function (e) {
         var a, b, i, val = this.value;
         closeAllLists();
@@ -33,9 +39,21 @@ function autocompleteInputBox(inp) {
         autocompleteSuggestionMapBoxAPI(inp.value, function (results) {
             results.features.forEach(function (key) {
                 b = document.createElement("DIV");
-                b.innerHTML = "<strong>" + key.place_name.substr(0, val.length) + "</strong>";
-                b.innerHTML += key.place_name.substr(val.length);
-                b.innerHTML += "<input type='hidden' data-lat='" + key.geometry.coordinates[1] + "' data-lng='" + key.geometry.coordinates[0] + "'  value='" + key.place_name + "'>";
+
+                var matchedPart = escapeHtml(key.place_name.substr(0, val.length));
+                var remainingPart = escapeHtml(key.place_name.substr(val.length));
+
+                b.innerHTML = "<strong>" + matchedPart + "</strong>" + remainingPart;
+
+                // Create hidden input safely
+                var hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.setAttribute('data-lat', key.geometry.coordinates[1]);
+                hiddenInput.setAttribute('data-lng', key.geometry.coordinates[0]);
+                hiddenInput.value = key.place_name;
+
+                b.appendChild(hiddenInput);
+
                 b.addEventListener("click", function (e) {
                     let lat = $(this).find('input').attr('data-lat');
                     let long = $(this).find('input').attr('data-lng');

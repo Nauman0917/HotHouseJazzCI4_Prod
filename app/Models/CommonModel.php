@@ -8,6 +8,17 @@ class CommonModel extends Model
 {
     protected $db;
     protected $archiveddb;
+    protected array $allowedFieldsMap = [
+        'id'               => 'el.id',
+        'venue_id'         => 'el.venue_id',
+        'location_name'    => 'el.location_name',
+        'location_address' => 'el.location_address',
+        'state'            => 'el.state',
+        'county'           => 'el.county',
+        'is_active'        => 'el.is_active',
+        'location_source'  => 'el.location_source',
+    ];
+
 
     public function __construct()
     {
@@ -79,7 +90,6 @@ class CommonModel extends Model
             log_message('error', 'editData error: ' . $e->getMessage());
             return false;
         }
-        
     }
     /***********************************************************************
      ** Function name: getDataByQuery
@@ -90,10 +100,10 @@ class CommonModel extends Model
     // Get Data (Generalized Fetch Function)
     public function getData($action = '', $tbl_name = '', $wcon = [], $shortField = '', $num_page = '', $cnt = '')
     {
-       //echo"<pre>";print_r($tbl_name);die;
+        //echo"<pre>";print_r($tbl_name);die;
         $builder = $this->db->table($tbl_name);
         $builder->select('*'); // Select all columns
-       // echo"<pre>";print_r($tbl_name);die; 
+        // echo"<pre>";print_r($tbl_name);die; 
         // Apply filters based on GET parameters
         if (!empty($_GET['event_name'])) {
             $builder->like('event_title', $_GET['event_name']);
@@ -146,32 +156,32 @@ class CommonModel extends Model
                 $builder->where($wcon['where']);
             } else {
                 $whereArray = explode('AND', $wcon['where']);
-                  foreach ($whereArray as $condition) {
-            // Validate the condition format or extract field name for validation
-            $trimmedCondition = trim($condition);
-            if (preg_match('/^([a-zA-Z0-9_]+)\s*[=<>!]+/', $trimmedCondition, $matches)) {
-                if ($this->isValidField($matches[1])) {
-                    $builder->where($trimmedCondition);
-                }
-            }
+                foreach ($whereArray as $condition) {
+                    // Validate the condition format or extract field name for validation
+                    $trimmedCondition = trim($condition);
+                    if (preg_match('/^([a-zA-Z0-9_]+)\s*[=<>!]+/', $trimmedCondition, $matches)) {
+                        if ($this->isValidField($matches[1])) {
+                            $builder->where($trimmedCondition);
+                        }
                     }
                 }
             }
+        }
 
         //   if (!empty($wcon['like'])) {
         // 	  $builder->like($wcon['like']);
         //   }
-       
+
         // ✅ Apply LIKE conditions correctly
         if (!empty($wcon['like']) && is_array($wcon['like'])) {
-          //  echo"<pre>";print_r($wcon['like']);die;
+            //  echo"<pre>";print_r($wcon['like']);die;
             $builder->groupStart(); // Start a grouping for OR conditions
             foreach ($wcon['like'] as $column => $value) {
                 $builder->orLike($column, $value);
             }
             $builder->groupEnd(); // End grouping
         }
-       
+
         // Sorting and Pagination
         if (!empty($shortField)) {
             $builder->orderBy($shortField);
@@ -379,47 +389,47 @@ class CommonModel extends Model
      ** Purpose: This function used for get data by encryptId
      ** Date : 23 JUNE 2022
      ************************************************************************/
-   public function getDataByParticularField($tableName = '', $fieldName = '', $fieldValue = '')
-{
-    // Empty parameter check for better security
-    if (empty($tableName) || empty($fieldName)) {
-     
-        throw new \InvalidArgumentException('Invalid parameters');
-    }
+    public function getDataByParticularField($tableName = '', $fieldName = '', $fieldValue = '')
+    {
+        // Empty parameter check for better security
+        if (empty($tableName) || empty($fieldName)) {
 
-    // Table validation with explicit security context
-    if (!$this->isValidTable($tableName)) {
-     
-        throw new \InvalidArgumentException('Invalid table name');
-    }
-    
-   // Fetch actual field names for the table to use as a whitelist
-    $allowedTableFields = $this->db->getFieldNames($tableName);
+            throw new \InvalidArgumentException('Invalid parameters');
+        }
 
-    if (empty($allowedTableFields)) {
-       
-        log_message('error', 'Could not retrieve fields for table: ' . $tableName);
-        throw new \RuntimeException('Unable to retrieve table structure for validation.');
-    }
+        // Table validation with explicit security context
+        if (!$this->isValidTable($tableName)) {
 
-    // Validate fieldName against the actual columns of the table using the existing isValidField method
-    if (!$this->isValidField($fieldName, $allowedTableFields)) {
-        throw new \InvalidArgumentException('Field "' . $fieldName . '" is not a valid or allowed field for table "' . $tableName . '".');
-    }
-    try {
-        // Parameterized query using CodeIgniter's query builder
-        $builder = $this->db->table($tableName)
-            ->select('*')
-            ->where([$fieldName => $fieldValue]);
+            throw new \InvalidArgumentException('Invalid table name');
+        }
 
-        $data = $builder->get()->getRowArray();
+        // Fetch actual field names for the table to use as a whitelist
+        $allowedTableFields = $this->db->getFieldNames($tableName);
 
-        return !empty($data) ? $data : [];
-    } catch (\Exception $e) {
-     
-        throw new \RuntimeException('Database error occurred');
+        if (empty($allowedTableFields)) {
+
+            log_message('error', 'Could not retrieve fields for table: ' . $tableName);
+            throw new \RuntimeException('Unable to retrieve table structure for validation.');
+        }
+
+        // Validate fieldName against the actual columns of the table using the existing isValidField method
+        if (!$this->isValidField($fieldName, $allowedTableFields)) {
+            throw new \InvalidArgumentException('Field "' . $fieldName . '" is not a valid or allowed field for table "' . $tableName . '".');
+        }
+        try {
+            // Parameterized query using CodeIgniter's query builder
+            $builder = $this->db->table($tableName)
+                ->select('*')
+                ->where([$fieldName => $fieldValue]);
+
+            $data = $builder->get()->getRowArray();
+
+            return !empty($data) ? $data : [];
+        } catch (\Exception $e) {
+
+            throw new \RuntimeException('Database error occurred');
+        }
     }
-}
 
 
     public function getAllDataByParticularField($tableName = '', $fieldName = '', $fieldValue = '')
@@ -471,8 +481,8 @@ class CommonModel extends Model
         $endDate   = date('Y-m-t');
         log_message("info", "currentMonth: $currentMonth");
         log_message("info", "currentYear: $currentYear");
-        log_message("debug","StartDate: $startDate");
-        log_message("debug","endDate: $endDate");
+        log_message("debug", "StartDate: $startDate");
+        log_message("debug", "endDate: $endDate");
 
 
         return $this->db->table('venue_tbl')
@@ -554,7 +564,7 @@ class CommonModel extends Model
 
     // public function getData_event_report($action = '', $tbl_name = '', $whereCon = [], $shortField = '', $num_page = '', $cnt = '')
     // {
-        
+
     //     // $builder = $this->db->table(event_tbl); // ✅ Use actual table name (no alias)
     //     $builder = $this->db->table("event_tbl");
     //     $builder->select("event_location_tbl.state, event_location_tbl.city, venue_tbl.venue_title, venue_tbl.position");
@@ -608,61 +618,61 @@ class CommonModel extends Model
     // }
     public function getData_event_report($action = '', $tbl_name = '', $whereCon = [], $shortField = '', $num_page = '', $cnt = '')
     {
-        log_message("info","getData_event_report");
+        log_message("info", "getData_event_report");
         log_message("debug", "action: $action");
         $builder = $this->db->table($tbl_name);
         $builder->select("event_location_tbl.state, event_location_tbl.city, venue_tbl.venue_title, venue_tbl.position, ftable.venue_id");
         //$builder->join('venue_tbl', 'venue_tbl.id = ftable.venue_id', 'left');
         // ✅ Selecting the correct columns
         //$builder->select("event_location_tbl.state, event_location_tbl.city, venue_tbl.venue_title, venue_tbl.position, ftable.venue_id");
-   
+
         // ✅ Correct JOIN conditions using alias `ftable`
         $builder->join('event_location_tbl', "event_location_tbl.id = ftable.save_location_id", 'left');
-       
+
         $builder->join('venue_tbl', "venue_tbl.id = ftable.venue_id", 'left');
         $currentMonthStart = date('Y-m-01');
-		$currentMonthEnd = date('Y-m-t');
+        $currentMonthEnd = date('Y-m-t');
         // echo"herer1sd2";die;
         $request = service('request'); // CI4 way to access request data
-    
+
         // ✅ Ensure the alias `ftable` is used for ambiguous columns
         if ($request->getGet('event_name')) {
             $builder->like("ftable.event_title", $request->getGet('event_name'));
         }
-    
+
         if ($request->getGet('location_name')) {
             $builder->where("ftable.save_location_id", $request->getGet('location_name'));
         }
-    
+
         if ($request->getGet('venue_id') && $request->getGet('venue_id') !== 'All') {
             $builder->where("ftable.venue_id", $request->getGet('venue_id')); // ✅ Specify alias
         }
-    
+
         if ($request->getGet('start_date')) {
             $builder->where("ftable.start_date >=", $request->getGet('start_date'));
-        }else {
+        } else {
             $builder->where('ftable.start_date >=', $currentMonthStart);
         }
-        
-    
+
+
         if ($request->getGet('end_date')) {
             $builder->where("ftable.end_date <=", $request->getGet('end_date'));
-        }else {
+        } else {
             $builder->where('ftable.end_date <=', $currentMonthEnd);
         }
         $builder->where('ftable.end_date !=', '');
         $builder->where('ftable.end_date is NOT NULL', NULL, FALSE);
-    
+
         // ✅ Order by with table prefix
         $builder->orderBy('venue_tbl.position', 'asc');
-    
+
         if (!empty($num_page)) {
             $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
         }
-    
+
         // Execute Query
         $query = $builder->get();
-    
+
         // ✅ Handle Different Actions
         if ($action == 'count') {
             return $query->getNumRows();
@@ -674,7 +684,7 @@ class CommonModel extends Model
             return false;
         }
     }
-    
+
     // public function getData_festival($action = '', $tbl_name = '', $wcon = [], $shortField = '', $num_page = '', $cnt = '')
     // {
     //    // $builder = $this->db->table('festival_tbl');  // ✅ CI4 Query Builder
@@ -724,7 +734,7 @@ class CommonModel extends Model
     //         }
     //         $builder->groupEnd(); // End grouping
     //     }
-       
+
     //     // Sorting and Pagination
     //     if (!empty($shortField)) {
     //         $builder->orderBy($shortField);
@@ -823,7 +833,7 @@ class CommonModel extends Model
         if (!empty($wcon['where']) && is_array($wcon['where'])) {
             $builder->where($wcon['where']);
         }
-    
+
         // ✅ Apply LIKE conditions correctly
         if (!empty($wcon['like']) && is_array($wcon['like'])) {
             $builder->groupStart(); // Start a grouping for OR conditions
@@ -832,22 +842,22 @@ class CommonModel extends Model
             }
             $builder->groupEnd(); // End grouping
         }
-    
+
         // ✅ Ensure `$shortField` is a string before applying `orderBy()`
         if (!empty($shortField) && is_string($shortField)) {
             $builder->orderBy($shortField);
         }
-    
+
         // ✅ Pagination
         if (!empty($num_page)) {
             $num_page = (int) $num_page; // Ensure it's an integer
             $cnt = (int) $cnt; // Convert offset to integer
             $builder->limit($num_page, $cnt);
         }
-    
+
         // ✅ Execute query
         $query = $builder->get();
-    
+
         // ✅ Handle different return types
         if ($action == 'count') {
             return $query->getNumRows();
@@ -856,14 +866,14 @@ class CommonModel extends Model
         } elseif ($action == 'multiple') {
             return $query->getResultArray();
         }
-    
+
         return false;
     }
-    
+
     public function totalEventsBySearch($action = '', $tbl_name = '', $whereCon = [], $shortField = '')
     {
         log_message('info', "totalEventsBySearch");
-        log_message('debug',"action: $action tbl_name: $tbl_name");
+        log_message('debug', "action: $action tbl_name: $tbl_name");
         $builder = $this->db->table($tbl_name);
 
         $builder->select('COUNT(*) as count');
@@ -1251,9 +1261,9 @@ class CommonModel extends Model
 
     public function getLocAPIData($action = '', $tbl_name = '', $wcon = '', $num_page = '', $cnt = '')
     {
-        log_message("info","getLocAPIData");
-        log_message("debug","tbl_name: $tbl_name");
-         // Validate table name first
+        log_message("info", "getLocAPIData");
+        log_message("debug", "tbl_name: $tbl_name");
+        // Validate table name first
         // if (!$this->isValidTable($tbl_name)) {
         //     throw new \InvalidArgumentException('Invalid table name');
         // }
@@ -1264,24 +1274,23 @@ class CommonModel extends Model
         $today_timestamp = strtotime(date('Y-m-d 00:00:00'));
 
         // Handling WHERE conditions safely
-    if (!empty($wcon['where'])) {
-        // Only accept array conditions (parameterized)
-        if (is_array($wcon['where'])) {
-            // Validate all keys for column names
-            foreach (array_keys($wcon['where']) as $field) {
-                if (!$this->isValidField($field)) {
-                 
-                    throw new \InvalidArgumentException('Invalid field name in where condition');
+        if (!empty($wcon['where'])) {
+            // Only accept array conditions (parameterized)
+            if (is_array($wcon['where'])) {
+                // Validate all keys for column names
+                foreach (array_keys($wcon['where']) as $field) {
+                    if (!$this->isValidField($field)) {
+                        throw new \InvalidArgumentException('Invalid field name in where condition');
+                    }
                 }
+                // Safe to use with validated array (CodeIgniter will parameterize values)
+                $builder->where($wcon['where']);
+            } else {
+                // String conditions are risky - reject or parse them
+
+                throw new \InvalidArgumentException('String where conditions are not allowed for security reasons');
             }
-            // Safe to use with validated array (CodeIgniter will parameterize values)
-            $builder->where($wcon['where']);
-        } else {
-            // String conditions are risky - reject or parse them
-           
-            throw new \InvalidArgumentException('String where conditions are not allowed for security reasons');
         }
-    }
 
         if (!empty($wcon['like'])) {
             $builder->like($wcon['like']);
@@ -1393,10 +1402,10 @@ class CommonModel extends Model
 
     public function getData_event($action = '', $tbl_name = '', $whereCon = [], $shortField = '', $num_page = '', $cnt = '')
     {
-        log_message("info","getData_event -->");
+        log_message("info", "getData_event -->");
         log_message('debug', "action: $action");
         log_message("debug", "tbl_name: $tbl_name");
-        
+
         $builder = $this->db->table($tbl_name);
         $builder->select('ftable.*, event_location_tbl.state, event_location_tbl.city');
         $builder->join('event_location_tbl', 'event_location_tbl.id = ftable.save_location_id', 'left');
@@ -1551,57 +1560,92 @@ class CommonModel extends Model
         $query = $builder->get();
         return ($query->getNumRows() > 0) ? $query->getResult() : false;
     }
-  public function deleteData($tableName = '', $fieldName = '', $fieldValue = '')
-{
-    // Validate table name against whitelist
-    if (!$this->isValidTable($tableName)) {
-        throw new \InvalidArgumentException('Invalid table name');
+    public function deleteData($tableName = '', $fieldName = '', $fieldValue = '')
+    {
+        // Validate table name against whitelist
+        if (!$this->isValidTable($tableName)) {
+            throw new \InvalidArgumentException('Invalid table name');
+        }
+
+        // Validate field name
+        if (!$this->isValidField($fieldName)) {
+            throw new \InvalidArgumentException('Invalid field name');
+        }
+
+        $builder = $this->db->table($tableName);
+        $builder->where([$fieldName => $fieldValue]);
+        $builder->delete();
+
+        return ($this->db->affectedRows() > 0); // Returns true if a row was deleted
     }
 
-    // Validate field name
-    if (!$this->isValidField($fieldName)) {
-        throw new \InvalidArgumentException('Invalid field name');
+    /**
+     * Validate if a table name is allowed
+     * 
+     * @param string $tableName The table name to validate
+     * @return bool True if valid, false otherwise
+     */
+    private function isValidTable($tableName)
+    {
+        // Whitelist of allowed tables
+        $allowedTables = [
+            'about_team_tbl',
+            'about_us_tbl',
+            'admin',
+            'admin_login_log',
+            'admin_module',
+            'admin_module_child',
+            'admin_module_child_permission',
+            'admin_module_permission',
+            'advertisement_tbl',
+            'advertise_tbl',
+            'archived_tbl',
+            'artist_tbl',
+            'banner_tbl',
+            'blog_tbl',
+            'comedyandspokenword_tbl',
+            'contact_details_tbl',
+            'current_issue_tbl',
+            'event_jazz_tbl',
+            'event_location_tbl',
+            'event_location_type',
+            'event_tags_tbl',
+            'event_tbl',
+            'festival_tbl',
+            'footer_tbl',
+            'get_hh_tbl',
+            'home_image',
+            'home_slider_image',
+            'import_tbl',
+            'jazz_types',
+            'lineup_tbl',
+            'location_tbl',
+            'matching_loc_data',
+            'module_permission',
+            'previous_issues_tbl',
+            'report_problem_tbl',
+            'role_permission',
+            'role_tbl',
+            'seo_tbl',
+            'setting_tbl',
+            'slider_tbl',
+            'state_tbl',
+            'submit_event_tbl',
+            'subscribe_tbl',
+            'ticketmaster_event_tbl',
+            'user',
+            'user_event_jazz_tbl',
+            'user_event_tags_tbl',
+            'user_event_tbl',
+            'venue_tbl'
+        ];
+
+        // var_dump($tableName);
+        // var_dump(in_array($tableName, $allowedTables, true));
+        // die;
+
+        return in_array($tableName, $allowedTables, true);
     }
-
-    $builder = $this->db->table($tableName);
-    $builder->where([$fieldName => $fieldValue]);
-    $builder->delete();
-
-    return ($this->db->affectedRows() > 0); // Returns true if a row was deleted
-}
-
-/**
- * Validate if a table name is allowed
- * 
- * @param string $tableName The table name to validate
- * @return bool True if valid, false otherwise
- */
-private function isValidTable($tableName)
-{
-    // Whitelist of allowed tables
-    $allowedTables = [
-        'about_team_tbl', 'about_us_tbl', 'admin', 'admin_login_log',
-        'admin_module', 'admin_module_child', 'admin_module_child_permission',
-        'admin_module_permission', 'advertisement_tbl', 'advertise_tbl',
-        'archived_tbl', 'artist_tbl', 'banner_tbl', 'blog_tbl',
-        'comedyandspokenword_tbl', 'contact_details_tbl', 'current_issue_tbl',
-        'event_jazz_tbl', 'event_location_tbl', 'event_location_type',
-        'event_tags_tbl', 'event_tbl', 'festival_tbl', 'footer_tbl',
-        'get_hh_tbl', 'home_image', 'home_slider_image', 'import_tbl',
-        'jazz_types', 'lineup_tbl', 'location_tbl', 'matching_loc_data',
-        'module_permission', 'previous_issues_tbl', 'report_problem_tbl',
-        'role_permission', 'role_tbl', 'seo_tbl', 'setting_tbl',
-        'slider_tbl', 'state_tbl', 'submit_event_tbl', 'subscribe_tbl',
-        'ticketmaster_event_tbl', 'user', 'user_event_jazz_tbl',
-        'user_event_tags_tbl', 'user_event_tbl', 'venue_tbl'
-    ];
-
-    // var_dump($tableName);
-    // var_dump(in_array($tableName, $allowedTables, true));
-    // die;
-
-    return in_array($tableName, $allowedTables, true);
-}
     public function checkEvent($save_location_id, $start_date, $end_date, $event_start_time, $event_end_time)
     {
 
@@ -1613,30 +1657,30 @@ private function isValidTable($tableName)
         // Date range conditions (safe, parameterized)
         $builder->groupStart()
             ->groupStart()
-                ->where('start_date <=', $start_date)
-                ->where('end_date >=', $start_date)
+            ->where('start_date <=', $start_date)
+            ->where('end_date >=', $start_date)
             ->groupEnd()
             ->orGroupStart()
-                ->where('start_date <=', $end_date)
-                ->where('end_date >=', $end_date)
+            ->where('start_date <=', $end_date)
+            ->where('end_date >=', $end_date)
             ->groupEnd()
             ->orGroupStart()
-                ->where('start_date >=', $start_date)
-                ->where('end_date <=', $end_date)
+            ->where('start_date >=', $start_date)
+            ->where('end_date <=', $end_date)
             ->groupEnd()
-        ->groupEnd();
+            ->groupEnd();
 
         // Time range conditions (safe, parameterized)
         $builder->groupStart()
             ->groupStart()
-                ->where('event_start_time <', $event_end_time)
-                ->where('event_end_time >', $event_start_time)
+            ->where('event_start_time <', $event_end_time)
+            ->where('event_end_time >', $event_start_time)
             ->groupEnd()
             ->orGroupStart()
-                ->where('event_start_time >=', $event_start_time)
-                ->where('event_end_time <=', $event_end_time)
+            ->where('event_start_time >=', $event_start_time)
+            ->where('event_end_time <=', $event_end_time)
             ->groupEnd()
-        ->groupEnd();
+            ->groupEnd();
 
         $query = $builder->get();
         $result = $query->getResultArray();
@@ -1665,102 +1709,101 @@ private function isValidTable($tableName)
     }
 
     function getAllData()
-	{
-        
+    {
+
         $builder = $this->db->table('role_tbl');
         $builder->select('*');
         $builder->where('is_active', 1);
         $query = $builder->get();
 
         return $query->getResultArray();
-	}
-	public function getEventData($eventId)
-	{
-		$eventId = (int) $eventId; // Ensure it's an integer
-    
-		$builder = $this->db->table('event_tbl');
-		$query = $builder->select('*')
-						 ->where('event_id', $eventId)
-						 ->get();
-		
-		return $query->getRowArray() ?: false; 
-	}
+    }
+    public function getEventData($eventId)
+    {
+        $eventId = (int) $eventId; // Ensure it's an integer
+
+        $builder = $this->db->table('event_tbl');
+        $query = $builder->select('*')
+            ->where('event_id', $eventId)
+            ->get();
+
+        return $query->getRowArray() ?: false;
+    }
     function DuplicateData($tableName = '', $data = array())
-	{
-	
+    {
+
         $builder = $this->db->table($tableName);
         $builder->insert($data);
         return $this->db->insertID();
-	}
+    }
 
     public function getDataByMultipleParticularField(string $table, string $field, $value)
-{
-    if (!$this->isValidField($field)) {
-        throw new \InvalidArgumentException('Invalid field name');
+    {
+        if (!$this->isValidField($field)) {
+            throw new \InvalidArgumentException('Invalid field name');
+        }
+
+        $builder = $this->db->table($table);
+
+        // Apply the WHERE condition
+        $builder->where($field, $value);
+
+        // Execute the query
+        $query = $builder->get();
+
+        // Return the result as an array of objects
+        return $query->getResult();
     }
-    
-    $builder = $this->db->table($table);
-
-    // Apply the WHERE condition
-    $builder->where($field, $value);
-
-    // Execute the query
-    $query = $builder->get();
-
-    // Return the result as an array of objects
-    return $query->getResult();
-}
-function deleteAllLineup($festivalId)
-	{
+    function deleteAllLineup($festivalId)
+    {
         $builder = $this->db->table('lineup_tbl');
-		$builder->where('festival_id', $festivalId)->delete();
-		return true;
-	}
-	function deleteAllPermissions($roleId)
-	{
+        $builder->where('festival_id', $festivalId)->delete();
+        return true;
+    }
+    function deleteAllPermissions($roleId)
+    {
         $builder = $this->db->table('role_permission');
-		$builder->where('role_id', $roleId)->delete();
-		return true;
-	}
+        $builder->where('role_id', $roleId)->delete();
+        return true;
+    }
 
-    
-	function artistData($id)
-	{
+
+    function artistData($id)
+    {
         $builder = $this->db->table('artist_tbl')
-                        ->select('artist_name')
-                        ->where('id', $id)
-                        ->get();
-    
-    // Fetch a single row as an object
-    $result = $builder->getRow();
+            ->select('artist_name')
+            ->where('id', $id)
+            ->get();
 
-    return $result ? $result->artist_name : null;
-		
-	}
+        // Fetch a single row as an object
+        $result = $builder->getRow();
+
+        return $result ? $result->artist_name : null;
+    }
 
     public function checkFestival($festival_name, $start_date, $end_date)
     {
         $builder = $this->db->table('festival_tbl');
-    $builder->where('festival_name', $festival_name);
+        $builder->where('festival_name', $festival_name);
 
-    // Properly use Query Builder for complex WHERE conditions
-    $builder->groupStart()
+        // Properly use Query Builder for complex WHERE conditions
+        $builder->groupStart()
             ->where('start_date <=', $start_date)
             ->where('end_date >=', $start_date)
             ->orGroupStart()
-                ->where('start_date <=', $end_date)
-                ->where('end_date >=', $end_date)
+            ->where('start_date <=', $end_date)
+            ->where('end_date >=', $end_date)
             ->groupEnd()
             ->orGroupStart()
-                ->where('start_date >=', $start_date)
-                ->where('end_date <=', $end_date)
+            ->where('start_date >=', $start_date)
+            ->where('end_date <=', $end_date)
             ->groupEnd()
-    ->groupEnd();
+            ->groupEnd();
 
-    $query = $builder->get();
-    return $query->getResultArray();// Fetch results as an array
+        $query = $builder->get();
+        return $query->getResultArray(); // Fetch results as an array
     }
-    
+
     public function getDataByCondition($table, $conditions)
     {
         $builder = $this->db->table($table);
@@ -1910,46 +1953,47 @@ function deleteAllLineup($festivalId)
         $this->db->transComplete();
         log_message("info", "getupdate old events <--");
     }
-    
+
     public function markEventsFestsInactive($oneDaysAgo, $currentDate)
     {
         $this->db->transStart();
-        
+
         // Use Query Builder for safe conditions
         $this->db->table('event_tbl')
             ->groupStart()
-                ->groupStart()
-                    ->where('end_date !=', '')
-                    ->where('end_date <=', $oneDaysAgo)
-                ->groupEnd()
-                ->orGroupStart()
-                    ->where('end_date', '')
-                    ->where('start_date <=', $oneDaysAgo)
-                ->groupEnd()
+            ->groupStart()
+            ->where('end_date !=', '')
+            ->where('end_date <=', $oneDaysAgo)
+            ->groupEnd()
+            ->orGroupStart()
+            ->where('end_date', '')
+            ->where('start_date <=', $oneDaysAgo)
+            ->groupEnd()
             ->groupEnd()
             ->where('is_active !=', 0)
             ->update(['is_active' => 0]);
-        
+
         $this->db->transComplete();
-    
+
         $this->db->transStart();
-        
-          $this->db->table('festival_tbl')
-        ->groupStart()
+
+        $this->db->table('festival_tbl')
             ->groupStart()
-                ->where('end_date !=', '')
-                ->where('end_date <=', $oneDaysAgo)
+            ->groupStart()
+            ->where('end_date !=', '')
+            ->where('end_date <=', $oneDaysAgo)
             ->groupEnd()
             ->orGroupStart()
-                ->where('end_date', '')
-                ->where('start_date <=', $oneDaysAgo)
+            ->where('end_date', '')
+            ->where('start_date <=', $oneDaysAgo)
             ->groupEnd()
-        ->groupEnd()
-        ->where('is_active !=', 0)
-        ->update(['is_active' => 0]);
+            ->groupEnd()
+            ->where('is_active !=', 0)
+            ->update(['is_active' => 0]);
 
-    $this->db->transComplete();
+        $this->db->transComplete();
     }
+
     public function executeCustomQuery($query, $params = [])
     {
         $result = $this->db->query($query, $params);
@@ -1963,19 +2007,19 @@ function deleteAllLineup($festivalId)
         return false;
     }
 
-public function totalArtist()
-{
-    $builder = $this->db->table('lineup_tbl')->select('lineup_id');
-    $query = $builder->get();
+    public function totalArtist()
+    {
+        $builder = $this->db->table('lineup_tbl')->select('lineup_id');
+        $query = $builder->get();
 
-    if ($query->getNumRows() > 0) {
-        return $query->getResult();
-    } else {
-        return false;
+        if ($query->getNumRows() > 0) {
+            return $query->getResult();
+        } else {
+            return false;
+        }
     }
-}
 
-public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereCon = [], $shortField = '', $num_page = '', $cnt = '')
+    public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereCon = [], $shortField = '', $num_page = '', $cnt = '')
     {
         $builder = $this->db->table('event_location_tbl el');
 
@@ -1988,7 +2032,7 @@ public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereC
             ->getCompiledSelect();
 
         // 🔹 Step 2: PostgreSQL-compatible join using ILIKE + concatenation (||)
-        $joinCondition = "el.venue_id = dupes.venue_id AND el.location_name ILIKE '%' || dupes.location_name || '%'";
+        $joinCondition = "el.venue_id = dupes.venue_id AND LOWER(el.location_name) LIKE CONCAT('%', LOWER(dupes.location_name), '%')";
 
         $builder->select('
                 el.id,
@@ -2005,25 +2049,46 @@ public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereC
 
         // 🔹 Step 3: Dynamic filters from controller ($whereCon)
         if (!empty($whereCon['like'])) {
+            $builder->groupStart();
             foreach ($whereCon['like'] as $like) {
                 foreach ($like as $field => $value) {
-                    $builder->groupStart()
-                            ->like($field, $value)
-                            ->groupEnd();
+                    $shortField = explode('.', $field);
+                    $shortField = end($shortField);
+                    if (!isset($this->allowedFieldsMap[$shortField])) {
+                        log_message('warning', 'Invalid LIKE field rejected', ['field' => $field]);
+                        continue;
+                    }
+
+                    $builder->orLike($this->allowedFieldsMap[$shortField], $value);
                 }
             }
+            $builder->groupEnd();
         }
 
+
         if (!empty($whereCon['where'])) {
+            $builder->groupStart(); // wrap all WHERE conditions
             foreach ($whereCon['where'] as $field => $value) {
-                $builder->where($field, $value);
+                $shortField = explode('.', $field);
+                $shortField = end($shortField);
+                if (!isset($this->allowedFieldsMap[$shortField])) {
+                    log_message('warning', 'Invalid WHERE field rejected', ['field' => $field]);
+                    continue;
+                }
+                $builder->where($this->allowedFieldsMap[$shortField], $value);
             }
+            $builder->groupEnd();
         }
 
         // 🔹 Step 4: Sorting
         if (!empty($shortField)) {
-            $parts = explode(' ', trim($shortField));
-            $builder->orderBy($parts[0], $parts[1] ?? 'ASC');
+            $sortParts = explode(' ', trim($shortField));
+            $column = $sortParts[0] ?? '';
+            $direction = strtoupper($sortParts[1] ?? 'ASC');
+        
+            if (isset($this->allowedFieldsMap[$column]) && in_array($direction, ['ASC', 'DESC'], true)) {
+                $builder->orderBy($this->allowedFieldsMap[$column], $direction);
+            }
         }
 
         // 🔹 Step 5: Pagination
@@ -2035,7 +2100,11 @@ public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereC
         $query = $builder->get();
 
         if ($query === false) {
-            log_message('error', 'getDuplicateEventLocations() failed SQL: ' . $db->getLastQuery());
+            log_message(
+                'error',
+                'getDuplicateEventLocations() failed SQL',
+                ['query' => (string) $this->db->getLastQuery()]
+            );
             return ($action === 'count') ? 0 : [];
         }
 
@@ -2051,5 +2120,4 @@ public function getDuplicateEventLocations($action = '', $tbl_name = '', $whereC
 
         return false;
     }
-
-}  
+}

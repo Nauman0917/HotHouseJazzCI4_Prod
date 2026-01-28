@@ -46,7 +46,19 @@
     }
 
     function Dattaopnmdl(src, formattedSrc) {
-        document.querySelector('.datta-example-modal-content').innerHTML = '<pre><code class="hljs html xml">' + formattedSrc + '</code></pre>';
+        const modalContent = document.querySelector('.datta-example-modal-content');
+
+        modalContent.textContent = '';
+
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.className = 'hljs html xml';
+
+        // code.innerHTML = formattedSrc; --> If source is from trusted source, use this instead of textContent
+        code.textContent = formattedSrc;
+
+        pre.appendChild(code);
+        modalContent.appendChild(pre);
 
         var btn_copy = document.querySelector('.md-datta-example-modal-copy');
         var closeBtn = document.querySelector('.datta-example-modal-close');

@@ -2,7 +2,7 @@
 // =========================================================
 // ==================    ui kit model code   ===============
 // =========================================================
-(function() {
+(function () {
     function hasClass(el, cls) {
         return el.className.split(' ').indexOf(cls) !== -1;
     }
@@ -17,7 +17,7 @@
         source = source.replace(new RegExp('\\n' + source.match(/^\n( *)/)[1], 'g'), '\n');
 
         if (blacklist) {
-            source = source.replace(/class="([^"]+)"/g, function(m, clsStr) {
+            source = source.replace(/class="([^"]+)"/g, function (m, clsStr) {
                 var clsArr = clsStr.replace(/^\s+|\s+$/, '').replace(/\s+/g, ' ').split(' ');
 
                 for (var i = 0, l = blacklist.length, clsInd; i < l; i++) {
@@ -39,14 +39,26 @@
 
     function Dattaclp(el, src) {
         return new ClipboardJS(el, {
-            text: function() {
+            text: function () {
                 return src;
             }
         });
     }
 
     function Dattaopnmdl(src, formattedSrc) {
-        document.querySelector('.datta-example-modal-content').innerHTML = '<pre><code class="hljs html xml">' + formattedSrc + '</code></pre>';
+        const modalContent = document.querySelector('.datta-example-modal-content');
+
+        modalContent.textContent = '';
+
+        const pre = document.createElement('pre');
+        const code = document.createElement('code');
+        code.className = 'hljs html xml';
+
+        // code.innerHTML = formattedSrc; --> If source is from trusted source, use this instead of textContent
+        code.textContent = formattedSrc;
+
+        pre.appendChild(code);
+        modalContent.appendChild(pre);
 
         var btn_copy = document.querySelector('.md-datta-example-modal-copy');
         var closeBtn = document.querySelector('.datta-example-modal-close');
@@ -54,7 +66,7 @@
         var btn_copyTimeout = null;
         var ClipboardJS = Dattaclp(btn_copy, src);
 
-        ClipboardJS.on('success', function(e) {
+        ClipboardJS.on('success', function (e) {
             if (btn_copyTimeout) {
                 clearTimeout(btn_copyTimeout);
                 btn_copyTimeout = null;
@@ -63,12 +75,12 @@
             btn_copy.className = btn_copy.className.replace(' copied', '');
             btn_copy.className += ' copied';
 
-            btn_copyTimeout = setTimeout(function() {
+            btn_copyTimeout = setTimeout(function () {
                 btn_copy.className = btn_copy.className.replace(' copied', '');
             }, 1000);
         });
 
-        var closeListener = function() {
+        var closeListener = function () {
             document.querySelector('.datta-example-modal-content').innerHTML = '';
             document.querySelector('.datta-example-modal').scrollTop = 0;
             closeBtn.removeEventListener('click', closeListener);
@@ -78,7 +90,7 @@
         closeBtn.addEventListener('click', closeListener);
         document.documentElement.className += ' datta-example-modal-opened';
     }
-    Array.prototype.slice.call(document.querySelectorAll('.datta-example')).forEach(function(parentEl) {
+    Array.prototype.slice.call(document.querySelectorAll('.datta-example')).forEach(function (parentEl) {
         var btnsWrapper = document.createElement('div');
         btnsWrapper.className = 'datta-example-btns';
 
@@ -102,7 +114,7 @@
         parentEl.appendChild(btnsWrapper);
 
         var btn_copyTimeout = null;
-        Dattaclp(btn_copy, src).on('success', function(e) {
+        Dattaclp(btn_copy, src).on('success', function (e) {
             if (btn_copyTimeout) {
                 clearTimeout(btn_copyTimeout);
                 btn_copyTimeout = null;
@@ -110,11 +122,11 @@
             btn_copy.className = btn_copy.className.replace(' copied', '');
             btn_copy.className += ' copied';
 
-            btn_copyTimeout = setTimeout(function() {
+            btn_copyTimeout = setTimeout(function () {
                 btn_copy.className = btn_copy.className.replace(' copied', '');
             }, 1000);
         });
-        btn_md_open.addEventListener('click', function(e) {
+        btn_md_open.addEventListener('click', function (e) {
             Dattaopnmdl(src, formattedSrc);
         });
     });

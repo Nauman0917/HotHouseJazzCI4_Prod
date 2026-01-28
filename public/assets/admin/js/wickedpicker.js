@@ -490,15 +490,20 @@
         changeValue: function (operator, input, clicked) {
             var target = (operator === '+') ? clicked.nextSibling : clicked.previousSibling;
             var targetClass = $(target).attr('class');
+        
             if (targetClass.endsWith('hours')) {
-                this.setHours(eval(this.getHours() + operator + 1));
+                var hours = this.getHours();
+                this.setHours(operator === '+' ? hours + 1 : hours - 1);
             } else if (targetClass.endsWith('minutes')) {
-                this.setMinutes(eval(this.getMinutes() + operator + this.options.minutesInterval));
+                var minutes = this.getMinutes();
+                this.setMinutes(operator === '+' ? minutes + this.options.minutesInterval : minutes - this.options.minutesInterval);
             } else if (targetClass.endsWith('seconds')) {
-                this.setSeconds(eval(this.getSeconds() + operator + this.options.secondsInterval));
+                var seconds = this.getSeconds();
+                this.setSeconds(operator === '+' ? seconds + this.options.secondsInterval : seconds - this.options.secondsInterval);
             } else {
                 this.setMeridiem();
             }
+        
             this.setText(input);
         },
 

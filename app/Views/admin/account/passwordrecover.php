@@ -21,8 +21,10 @@
                                     <?=session()->getFlashdata('alert_success')?>
                                 </div>
                             <?php endif; ?>
-                            <input type="hidden" name="userEmail" id="userEmail" value="<?= $_GET['email'] ?>" >
-                            <input type="hidden" name="token" id="token" value="<?= $_GET['token'] ?>" >
+                            
+                            <input type="hidden" name="userEmail" id="userEmail" value="<?= esc($email, 'attr') ?>" >
+                            <input type="hidden" name="token" id="token" value="<?= esc($token, 'attr') ?>" >
+                            
                             <div class="form-group mb-3">
                                 <label class="floating-label" for="userPassword">New Password</label>
                                 <input type="password" name="userPassword" id="userPassword" class="form-control required" value="<?php if(old('userPassword') && !$recoversuccess): echo old('userPassword'); endif; ?>" placeholder="Password" autocomplete="off"/>

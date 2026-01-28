@@ -50,7 +50,7 @@
             show: null,
             clearable: false,
             closeOnClickOutside: true,
-            onClickOutside: function() {},
+            onClickOutside: function () { },
         };
 
     /*
@@ -102,7 +102,7 @@
             }
             var timepickerPos = $(element).offset();
 
-            $(element).attr({'aria-showingpicker': 'true', 'tabindex': -1});
+            $(element).attr({ 'aria-showingpicker': 'true', 'tabindex': -1 });
             this.setText(element);
             this.showHideMeridiemControl();
             if (this.getText(element) !== this.getTime()) {
@@ -220,9 +220,9 @@
             $(element).on('click focus', function (event) {
                 //Prevent multiple firings
                 if ($(self.timepicker).is(':hidden')) {
-                  self.showPicker($(this));
-                  window.lastTimePickerControl = $(this); //Put the reference on this timepicker into global scope for unsing that in afterShow function
-                  $(self.hoursElem).focus();
+                    self.showPicker($(this));
+                    window.lastTimePickerControl = $(this); //Put the reference on this timepicker into global scope for unsing that in afterShow function
+                    $(self.hoursElem).focus();
                 }
             });
 
@@ -233,21 +233,21 @@
                 if ($(self.timepicker).is(':visible')) {
                     //Clicking the X
                     if ($(event.target).is(self.close)) {
-                      self.hideTimepicker(window.lastTimePickerControl);
+                        self.hideTimepicker(window.lastTimePickerControl);
                     } else if ($(event.target).closest(self.timepicker).length || $(event.target).closest($('.hasWickedpicker')).length) { //Clicking the Wickedpicker or one of it's inputs
-                      event.stopPropagation();
+                        event.stopPropagation();
                     } else {   //Everything else
-                      if (typeof self.options.onClickOutside === 'function') {
-                        self.options.onClickOutside();
-                      }
-                      else {
-                        console.warn("Type of onClickOutside must be a function");
-                      }
+                        if (typeof self.options.onClickOutside === 'function') {
+                            self.options.onClickOutside();
+                        }
+                        else {
+                            console.warn("Type of onClickOutside must be a function");
+                        }
 
-                      if (!self.options.closeOnClickOutside) {
-                        return;
-                      }
-                      self.hideTimepicker(window.lastTimePickerControl);
+                        if (!self.options.closeOnClickOutside) {
+                            return;
+                        }
+                        self.hideTimepicker(window.lastTimePickerControl);
                     }
                     window.lastTimePickerControl = null;
                 }
@@ -464,13 +464,13 @@
                 'Wickedpicker': this,
                 'input': element
             }, function (event) {
-                if(event.which!=1) return false;
+                if (event.which != 1) return false;
                 var operator = (this.className.indexOf('up') > -1) ? '+' : '-';
                 var passedData = event.data;
                 if (event.type == 'mousedown') {
                     timeOut = setInterval($.proxy(function (args) {
                         args.Wickedpicker.changeValue(operator, args.input, this);
-                    }, this, {'Wickedpicker': passedData.Wickedpicker, 'input': passedData.input}), 200);
+                    }, this, { 'Wickedpicker': passedData.Wickedpicker, 'input': passedData.input }), 200);
                 } else {
                     passedData.Wickedpicker.changeValue(operator, passedData.input, this);
                 }
@@ -490,15 +490,20 @@
         changeValue: function (operator, input, clicked) {
             var target = (operator === '+') ? clicked.nextSibling : clicked.previousSibling;
             var targetClass = $(target).attr('class');
+        
             if (targetClass.endsWith('hours')) {
-                this.setHours(eval(this.getHours() + operator + 1));
+                var hours = this.getHours();
+                this.setHours(operator === '+' ? hours + 1 : hours - 1);
             } else if (targetClass.endsWith('minutes')) {
-                this.setMinutes(eval(this.getMinutes() + operator + this.options.minutesInterval));
+                var minutes = this.getMinutes();
+                this.setMinutes(operator === '+' ? minutes + this.options.minutesInterval : minutes - this.options.minutesInterval);
             } else if (targetClass.endsWith('seconds')) {
-                this.setSeconds(eval(this.getSeconds() + operator + this.options.secondsInterval));
+                var seconds = this.getSeconds();
+                this.setSeconds(operator === '+' ? seconds + this.options.secondsInterval : seconds - this.options.secondsInterval);
             } else {
                 this.setMeridiem();
             }
+        
             this.setText(input);
         },
 
@@ -535,7 +540,7 @@
         formatTime: function (hour, min, meridiem, seconds) {
             var formattedTime = hour + this.options.timeSeparator + min;
             if (this.options.showSeconds) {
-                formattedTime += this.options.timeSeparator  + seconds;
+                formattedTime += this.options.timeSeparator + seconds;
             }
             if (this.options.twentyFour === false) {
                 formattedTime += ' ' + meridiem;
@@ -562,12 +567,12 @@
          *
          * @param input
          */
-        makePickerInputClearable: function(input) {
+        makePickerInputClearable: function (input) {
             $(input).wrap('<div class="clearable-picker"></div>').after('<span data-clear-picker>&times;</span>');
 
             //When the x is clicked, clear its sibling input field
-            $('[data-clear-picker]').on('click', function(event) {
-               $(this).siblings('.hasWickedpicker').val('');
+            $('[data-clear-picker]').on('click', function (event) {
+                $(this).siblings('.hasWickedpicker').val('');
             });
         },
 
@@ -597,7 +602,7 @@
             var inputValue = $(this.element).val();
             return (inputValue === '') ? this.formatTime(this.selectedHour, this.selectedMin, this.selectedMeridiem, this.selectedSec) : inputValue;
         },
-        _hide: function() {
+        _hide: function () {
             this.hideTimepicker(this.element);
         }
     });

@@ -547,9 +547,6 @@ class Adminmanagefestivals extends BaseController
 						$jazz_ids = $this->request->getPost('jazz_types_id');
 					}
 
-					var_dump($start_times, $artist_ids); // Debugging line to check values
-					die;
-
 					if (is_array($start_times) && is_array($artist_ids) && count($start_times) > 0)
 					{
 						foreach ($start_times as $index => $start_time) {

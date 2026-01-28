@@ -568,7 +568,7 @@
                   </div>
                 </div>
 
-                
+
 
                 <div class="row">
                   <h5>Note : Use below option if event spans over multiple days. <br>
@@ -615,27 +615,27 @@
                 </div>
                 <div class="form-group-inner col-lg-6 col-md-6 col-sm-12 col-xs-12  <?php echo ($EDITDATA['repeating_event'] == 'Yes') ? 'show' : 'hide'; ?> <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('no_of_repeat')) : ?>error<?php endif; ?>" id="repeat">
                   <label>Number of repeats:<span class="required">*</span></label>
-                  <input type="number" min="0"  step="1" name="no_of_repeat" id="no_of_repeat" value="<?= old('no_of_repeat') ?: $EDITDATA['no_of_repeat'] ?>" class="form-control required" placeholder="Number of repeats:">
+                  <input type="number" min="0" step="1" name="no_of_repeat" id="no_of_repeat" value="<?= old('no_of_repeat') ?: $EDITDATA['no_of_repeat'] ?>" class="form-control required" placeholder="Number of repeats:">
                   <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('no_of_repeat')) : ?>
                     <span for="no_of_repeat" generated="true" class="help-inline"><?php echo session()->getFlashdata('validation')->getError('no_of_repeat'); ?></span>
                   <?php endif; ?>
                 </div>
               </div>
 
-                <div class="row">
-                  <div class="form-group-inner col-lg-8 col-md-8 col-sm-12 col-xs-12 <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('description')) : ?>error<?php endif; ?>">
-                    <label>Description</label>
-                    <textarea name="description" id="description" class="form-control required" placeholder="Description" style="height: 200px;"><?php if (old('description')) : echo old('description');
-                                                                                                                                                  else : echo stripslashes($EDITDATA['description']);
-                                                                                                                                                  endif; ?></textarea>
-                    <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('description')) : ?>
-                      <span for="description" generated="true" class="help-inline"><?php echo session()->getFlashdata('validation')->getError('description'); ?></span>
-                    <?php endif; ?>
-                  </div>
+              <div class="row">
+                <div class="form-group-inner col-lg-8 col-md-8 col-sm-12 col-xs-12 <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('description')) : ?>error<?php endif; ?>">
+                  <label>Description</label>
+                  <textarea name="description" id="description" class="form-control required" placeholder="Description" style="height: 200px;"><?php if (old('description')) : echo old('description');
+                                                                                                                                                else : echo stripslashes($EDITDATA['description']);
+                                                                                                                                                endif; ?></textarea>
+                  <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('description')) : ?>
+                    <span for="description" generated="true" class="help-inline"><?php echo session()->getFlashdata('validation')->getError('description'); ?></span>
+                  <?php endif; ?>
                 </div>
+              </div>
 
 
-                
+
 
               <!-- <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12">
@@ -672,7 +672,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-12">
                   <div class="form-group">
@@ -939,20 +939,17 @@
                 <div class="form-group-inner col-lg-6 col-md-6 col-sm-12 col-xs-12 <?php if (session()->getFlashdata('validation') && session()->getFlashdata('validation')->hasError('event_tags')) : ?>error<?php endif; ?>">
                   <label>Event Tags<span class=""></span></label>
                   <?php
-                 
+
                   // $event_tags = array_column($EDITDATAEVENT, 'event_tags');
                   // // echo"<pre>";print_r($event_tags);die;
                   // $event_tags_string = implode(', ', $event_tags);
 
-                  if(is_array($EDITDATAEVENT))
-                  {
-                  $event_tags = array_column($EDITDATAEVENT, 'event_tags');
-                  $event_tags_string = implode(', ', $event_tags);
-                  }
-                  else
-                  {
-                    $event_tags='';
-                    $event_tags_string ='';
+                  if (is_array($EDITDATAEVENT)) {
+                    $event_tags = array_column($EDITDATAEVENT, 'event_tags');
+                    $event_tags_string = implode(', ', $event_tags);
+                  } else {
+                    $event_tags = '';
+                    $event_tags_string = '';
                   }
                   ?>
                   <input type="text" name="event_tags" id="event_tags" class="form-control" placeholder="Funk Jazz, Latin Jazz, Big Band" value="<?php echo htmlspecialchars($event_tags_string); ?>">
@@ -1224,7 +1221,7 @@
       success: function(response) {
         ///alert(data.name);
         console.log(data);
-var data = response.data;
+        var data = response.data;
         $("#location_name").val(data.location_name);
         $("#location_address").val(data.location_address);
         $("#longitude").val(data.longitude);
