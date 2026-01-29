@@ -21,7 +21,7 @@ class CspFilter implements FilterInterface
 
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Nothing needed here
+        // No need to add anything here
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
