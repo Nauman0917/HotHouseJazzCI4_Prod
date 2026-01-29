@@ -45,6 +45,11 @@ display: block;
 max-width: 150px;
 width: 150px;
 }
+/* @media (width: 560px) and (height: 693px) {
+  img.img-fluid {
+    padding: 10px !important;
+  }
+} */
 
 .hhj-home-search {
 margin-top: 30px;
@@ -183,6 +188,7 @@ padding: 0px;
 display: flex;
 align-items: center;
 justify-content: center;
+padding-bottom: 10px;
 }
 
 .hhj-search-menu ul li {
@@ -575,6 +581,7 @@ display: block;
 }
 
 .carousel-item img {
+height: 150px;
 width: 100%;
 border-radius: 7px;
 }
@@ -618,6 +625,5 @@ background: #FE0000;
 }
 
 .sponsor-row .hhj-sinfo {
-margin-bottom: 0px!important;
+    margin-bottom: 0px!important;
 }
-

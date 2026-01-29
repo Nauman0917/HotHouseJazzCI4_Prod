@@ -905,6 +905,7 @@
     overflow: hidden;
     background: #000000;
     margin-right: 10px;
+     margin-bottom: 15px;
     border-radius: 7px;
     padding: 10px 15px;
     color: #ffffff;
@@ -922,8 +923,35 @@
     
     .hhj-how-to p a span,
     .hhj-how-to p a {
-    background: #FE0000;
+     background: #FE0000;
+    display: inline-block;
+    margin-bottom: 15px;  /* Add space below each button */
+    margin-right: 15px;  
     }
+    /* Mobile-specific styles */
+@media screen and (max-width: 576px) {
+        .hhj-how-to a {
+        display: block;
+        width: 100%; /* Full width on mobile */
+        float: none; /* Remove float on mobile */
+        margin-right: 0; /* Remove right margin on mobile */
+        margin-bottom: 15px; /* Add space below each button */
+        text-align: center; /* Center text on mobile */
+    }
+    
+    /* Make sure parent container doesn't have float issues */
+    .hhj-how-to p {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        clear: both;
+    }
+    
+    /* Add more space between the buttons in subscribe section */
+    .subscribe_btn {
+        flex-direction: column !important;
+    }
+}
     
     .hhj-how-to p.default-heading {
     display: block;
@@ -965,9 +993,9 @@
     }
     
     .blog-post a {
-    display: block;
+    display: inline-block;
     float: right;
-    margin-top: -20px;
+    margin-top: -3px;
     color: #FE0000;
     }
     
@@ -1333,4 +1361,3 @@
             width: 280px !important;
         }
     }
-    

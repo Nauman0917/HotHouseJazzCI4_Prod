@@ -91,12 +91,55 @@ display: block;
 width: 100%;
 }
 
+.desk-hide {
+display: inline !important;
+}
+
+/* Make dropdowns work with click only (not hover) */
+/* .dropdown:hover .dropdown-menu {
+  display: none !important;
+} */
+
+.dropdown-menu.show {
+  display: block !important;
+}
+/* Override Bootstrap dropdown behaviors */
+.dropdown-toggle[aria-expanded="true"]::after,
+.dropdown-toggle[aria-expanded="false"]::after {
+  display: inline-block;
+}
+
+/* Force dropdown behavior for all screen sizes */
+@media (min-width: 0px) {
+  .dropdown .dropdown-menu {
+    display: none;
+  }
+  
+  .dropdown .dropdown-menu.show {
+    display: block !important;
+  }
+  
+  .dropdown:hover .dropdown-menu {
+    display: none;
+  }
+}
+
+/* Ensure dropdown toggle behavior works */
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+/* Avoid any Bootstrap interference */
+.dropdown .dropdown-menu:not(.show) {
+  display: none !important;
+}
 .navbar-collapse.collapse.show ul li a {
 color: #ffffff;
 padding: 12px 15px 12px 20px !important;
 width: 100%;
-display: block;
+display: block !important;
 border-bottom: 1px solid #555555;
+background-color: #000000;
 }
 
 .navbar-collapse.collapse.show ul li:last-child a {
@@ -105,7 +148,13 @@ border: none;
 
 .navbar-collapse.collapse.show ul li a.dropdown-toggle {
 padding: 5px 15px 5px 20px !important;
+ /* display: block !important; */
 }
+/* @media (max-width: 991.98px) {
+    .dropdown-menu.show {
+        display: block !important;
+    }
+} */
 
 .navbar-collapse.collapse.show ul li.dropdown.show .dropdown-menu.show {
 padding: 0px;
@@ -319,11 +368,13 @@ padding: 0px 5px;
 
 .footer-menu ul li a {
 font-size: 14px;
+padding: 0px 6px;
 }
 
 .page-ending p {
 font-size: 12px;
 margin: 0px;
+padding: 20px;
 }
 
 footer h3 {
