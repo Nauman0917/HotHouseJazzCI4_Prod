@@ -35,6 +35,7 @@ class Filters extends BaseFilters
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
         'authCheck' => \App\Filters\AuthCheck::class,
+        'csp' => \App\Filters\CspFilter::class,
     ];
 
     /**
@@ -75,6 +76,7 @@ class Filters extends BaseFilters
             // 'invalidchars',
         ],
         'after' => [
+            'csp',
             // 'honeypot',
             // 'secureheaders',
         ],
