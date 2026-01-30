@@ -78,11 +78,9 @@ class Login extends BaseController {
 			if ($validation->withRequest($this->request)->run()) {
 				
 				$result = $this->admin_model->Authenticate($this->request->getPost('userEmail'));
-				
+
 				if ($result) {
-					// if(!password_verify($this->request->getPost('userPassword'), $result['admin_password'])):
-					// 	$data['error'] = lang('statictext_lang.invalidpassword');
-					if($this->admin_model->decryptsPassword($result['admin_password']) != $this->request->getPost('userPassword')):
+					if(!password_verify($this->request->getPost('userPassword'), $result['admin_password'])):
 						$data['error'] = lang('statictext_lang.invalidpassword');
 					elseif($result['status'] != 'A'):	
 						$data['error'] = lang('statictext_lang.accountblock');
@@ -466,7 +464,12 @@ class Login extends BaseController {
 					$data['recovererror'] = lang('statictext_lang.invalidotp');
 				endif;
 			endif;
-		
+
+		if($_GET['token'] && $_GET['email']):
+			$data['token'] = $_GET['token'];
+			$data['email'] = $_GET['email'];
+		endif;
+
 		$this->layouts->set_title('Password Recover');
 		$this->layouts->admin_view('account/passwordrecover',array(),$data,'login');
 	}	// END OF FUNCTION

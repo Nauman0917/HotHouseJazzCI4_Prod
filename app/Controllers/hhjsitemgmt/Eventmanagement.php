@@ -38,7 +38,7 @@ class Eventmanagement extends BaseController
 		$this->common_model = new CommonModel();
 		$this->layouts = new Layouts();
 		$this->session = session();
-		helper(['common', 'general' ,'form', 'url']);
+		helper(['common', 'general', 'form', 'url']);
 		error_reporting(0);
 		// $this->load->model(array('admin_model', 'emailtemplate_model', 'sms_model', 'notification_model', 'elastic_model'));
 		$this->lang = service('language');
@@ -70,14 +70,14 @@ class Eventmanagement extends BaseController
 
 		if ($this->request->getGet('searchValue')) :
 			$sValue = $this->request->getGet('searchValue');
-			
+
 			$whereCon['like'] = [
-				'ftable.event_title' => $sValue	
+				'ftable.event_title' => $sValue
 			];
-		
-			$data['searchField'] = $sField ?? ''; 
+
+			$data['searchField'] = $sField ?? '';
 			$data['searchValue'] = $sValue;
-			
+
 		else :
 			$whereCon['like'] = [];
 			$data['searchField'] = '';
@@ -129,26 +129,26 @@ class Eventmanagement extends BaseController
 		// 	$data['first']					=	1;
 		// 	$data['noOfContent']			=	'';
 		// endif;
-		if($this->request->getGet('showLength') == 'All'):
+		if ($this->request->getGet('showLength') == 'All'):
 			$perPage	 					= 	$totalRows;
-			
-			$data['perpage'] 				= 	$this->request->getGet('showLength');  
-		elseif($this->request->getGet('showLength')):
-			$perPage	 					= 	$this->request->getGet('showLength'); 
+
+			$data['perpage'] 				= 	$this->request->getGet('showLength');
+		elseif ($this->request->getGet('showLength')):
+			$perPage	 					= 	$this->request->getGet('showLength');
 			// echo"<pre>";print_r($perPage);die;
-			$data['perpage'] 				= 	$this->request->getGet('showLength'); 
+			$data['perpage'] 				= 	$this->request->getGet('showLength');
 		else:
 			$perPage	 					= 	SHOW_NO_OF_DATA;
-			$data['perpage'] 				= 	SHOW_NO_OF_DATA; 
+			$data['perpage'] 				= 	SHOW_NO_OF_DATA;
 		endif;
 		$data['perpage'] = $perPage;
 
 		// ✅ Get the `page` parameter from the GET request
 		$page = $this->request->getGet('page') ?? 1;
-        $page = max(1, (int)$page);
-	
+		$page = max(1, (int)$page);
+
 		// ✅ Generate pagination links
-		$suffix = '?'.http_build_query($_GET); // Preserve filters in pagination
+		$suffix = '?' . http_build_query($_GET); // Preserve filters in pagination
 		$data['PAGINATION'] = adminPagination($baseUrl, $suffix, $totalRows, $perPage, $page);
 		//echo"<pre>";print_r($data['PAGINATION']);die;
 		$data['forAction'] = $baseUrl;
@@ -156,14 +156,14 @@ class Eventmanagement extends BaseController
 			// ✅ Ensure `$page` is always at least 1
 			$page = $this->request->getGet('page') ?? 1;
 			$page = max(1, (int)$page); // Ensure page starts from at least 1
-		
+
 			// ✅ Fix the offset for fetching paginated data
 			$offset = ($page - 1) * $perPage;
-		
+
 			// ✅ Correct Serial Number Calculation
 			$first = $offset + 1;
 			$data['first'] = $first;
-		
+
 			$last = min($first + $perPage - 1, $totalRows);
 			$data['noOfContent'] = "Showing $first-$last of $totalRows items";
 		} else {
@@ -232,207 +232,92 @@ class Eventmanagement extends BaseController
 		if ($this->request->getPost('SaveChanges')) :
 			// 
 			$validation = \Config\Services::validation();
-     $postData = $this->request->getPost();
-		$error = 'NO';
+			$postData = $this->request->getPost();
+			$error = 'NO';
 
-		// Define validation rules
-		$rules = [
-			'event_title'      => 'required|trim',
-			'save_location_id' => 'required|trim',
-			'start_date'       => 'required|trim',
-			'end_date'         => 'required|trim',
-			'location_name'    => 'required|trim',
-			'location_address' => 'required|trim',
-			'latitude'         => 'required|trim',
-			'longitude'        => 'required|trim',
-			'venue_id'         => 'required|trim',
-		];
-
-		// Custom error messages
-		$messages = [
-			'event_title'      => ['required' => 'Event Title is required.'],
-			'save_location_id' => ['required' => 'Location is required.'],
-			'start_date'       => ['required' => 'Start Date is required.'],
-			'end_date'         => ['required' => 'End Date is required.'],
-			'location_name'    => ['required' => 'Location Name is required.'],
-			'location_address' => ['required' => 'Location Address is required.'],
-			'latitude'         => ['required' => 'Latitude is required.'],
-			'longitude'        => ['required' => 'Longitude is required.'],
-			'venue_id'         => ['required' => 'Venue is required.'],
-		];
-
-	
-
-		if (empty($_FILES['cover_image']['name']) && empty($postData['CurrentDataID'])) {
-			$rules['cover_image'] = 'uploaded[cover_image]|is_image[cover_image]|max_size[cover_image,2048]';
-			$messages['cover_image'] = [
-				'uploaded' => 'Cover Image is required.',
-				'is_image' => 'Please upload a valid image file.',
-				'max_size' => 'Image size must be under 2MB.'
+			// Define validation rules
+			$rules = [
+				'event_title'      => 'required|trim',
+				'save_location_id' => 'required|trim',
+				'start_date'       => 'required|trim',
+				'end_date'         => 'required|trim',
+				'location_name'    => 'required|trim',
+				'location_address' => 'required|trim',
+				'latitude'         => 'required|trim',
+				'longitude'        => 'required|trim',
+				'venue_id'         => 'required|trim',
 			];
-		}
 
-		// Set validation rules
-		$validation->setRules($rules, $messages);
-
-		if (!$validation->withRequest($this->request)->run()) {
-			return redirect()->back()->withInput()->with('validation', $validation);
-		}
-
-		// File Upload Handling
-		$param = [];
-
-		// Upload Event Image
-		$file = $this->request->getFile('image');
-		if ($file && $file->isValid() && !$file->hasMoved()) {
-			$newName = $file->getRandomName();
-			$file->move('assets/front/img/eventimage', $newName);
-			$param['image'] = $newName;
-		} elseif (!empty($postData['existing_image'])) {
-			$param['image'] = $postData['existing_image']; // Retain existing image
-		}
-
-		// Upload Cover Image
-		$coverFile = $this->request->getFile('cover_image');
-		if ($coverFile && $coverFile->isValid() && !$coverFile->hasMoved()) {
-			$newCoverName = $coverFile->getRandomName();
-			$coverFile->move('assets/front/img/eventimage', $newCoverName);
-			$param['cover_image'] = $newCoverName;
-		} elseif (!empty($postData['cover_existing_image'])) {
-			$param['cover_image'] = $postData['cover_existing_image']; // Retain existing cover image
-		}
-					$num_weeks = $this->request->getPost('no_of_repeat');
-					$start_date = $this->request->getPost('start_date');
-
-					$endd_date = $this->request->getPost('end_date');
-					$week_dates = array();
-					if ($this->request->getPost('CurrentDataID') == '') :
-						if ($this->request->getPost('repeating_event') == 'Yes') {
-							for ($i = 0; $i < $num_weeks; $i++) {
-								if ($this->request->getPost('frequecy') == 'weekly') {
-									$week_start = date("Y-m-d", strtotime("+" . $i . " week", strtotime($start_date)));
-									$week_end = date("Y-m-d", strtotime("+" . ($i + 1) . " week - 1 day", strtotime($start_date)));
-									$week_dates[$i] =  $week_start;
-								} else {
-									$week_start = date("Y-m-d", strtotime("+" . $i . " day", strtotime($start_date)));
-									$week_dates[$i] = $week_start;
-								}
+			// Custom error messages
+			$messages = [
+				'event_title'      => ['required' => 'Event Title is required.'],
+				'save_location_id' => ['required' => 'Location is required.'],
+				'start_date'       => ['required' => 'Start Date is required.'],
+				'end_date'         => ['required' => 'End Date is required.'],
+				'location_name'    => ['required' => 'Location Name is required.'],
+				'location_address' => ['required' => 'Location Address is required.'],
+				'latitude'         => ['required' => 'Latitude is required.'],
+				'longitude'        => ['required' => 'Longitude is required.'],
+				'venue_id'         => ['required' => 'Venue is required.'],
+			];
 
 
-							$param['event_title']				= 	$this->request->getPost('event_title');
-							$hour 								= 	$this->request->getPost('event_start_hour');
-							$min								= 	$this->request->getPost('event_start_min');
-							$event_start_M						= 	$this->request->getPost('event_start_M');
-							$hour_end 							= 	$this->request->getPost('event_end_hour');
-							$min_end							= 	$this->request->getPost('event_end_min');
-							$event_end_M						= 	$this->request->getPost('event_end_M');
-							$param['save_location_id']			= 	$this->request->getPost('save_location_id');
-							$param['description']				= 	$this->request->getPost('description');
-							$param['start_date']				= 	$week_start;
-							$param['end_date']					= 	$week_start;
-							$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
-							$param['time_permission']			= 	$this->request->getPost('time_permission');
-							if ($param['time_permission'] == 'Yes') {
 
-								try {
-									$start_time = new DateTime("{$hour}:{$min} {$event_start_M}");
+			if (empty($_FILES['cover_image']['name']) && empty($postData['CurrentDataID'])) {
+				$rules['cover_image'] = 'uploaded[cover_image]|is_image[cover_image]|max_size[cover_image,2048]';
+				$messages['cover_image'] = [
+					'uploaded' => 'Cover Image is required.',
+					'is_image' => 'Please upload a valid image file.',
+					'max_size' => 'Image size must be under 2MB.'
+				];
+			}
 
-									$start_time->modify('+1 hour 30 minutes');
+			// Set validation rules
+			$validation->setRules($rules, $messages);
 
-									$param['event_end_time'] = $start_time->format('h:i A');  // Format as HH:MM AM/PM
-								} catch (Exception $e) {
-									$param['event_end_time'] = 'Invalid time format';
-								}
-							} else {
-								$param['event_end_time'] = $hour_end . ':' . $min_end . ' ' . $event_end_M;
-							}
-							// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
+			if (!$validation->withRequest($this->request)->run()) {
+				return redirect()->back()->withInput()->with('validation', $validation);
+			}
 
+			// File Upload Handling
+			$param = [];
 
-							$combined_date_and_time = $param['start_date'] . ' ' . $param['event_start_time'];
-							$param['date'] = strtotime($combined_date_and_time);
+			// Upload Event Image
+			$file = $this->request->getFile('image');
+			if ($file && $file->isValid() && !$file->hasMoved()) {
+				$newName = $file->getRandomName();
+				$file->move('assets/front/img/eventimage', $newName);
+				$param['image'] = $newName;
+			} elseif (!empty($postData['existing_image'])) {
+				$param['image'] = $postData['existing_image']; // Retain existing image
+			}
 
-							$param['event_types']				=   $this->request->getPost('event_types');
-							$param['url']				        =   $this->request->getPost('url');
-							$param['cover_url']				    =   $this->request->getPost('cover_url');
-							$param['cover_image']			    =   $this->request->getPost('cover_image');
-							$param['video']				        =   $this->request->getPost('video');
-							$param['video2']				    =   $this->request->getPost('video2');
-							$param['video3']				    =   $this->request->getPost('video3');
-							$param['qr_code_link']			    =   $this->request->getPost('qr_code_link');
-							$param['buy_now_link']			    =   $this->request->getPost('buy_now_link');
-							$param['reserve_seat_link']			=   $this->request->getPost('reserve_seat_link');
-							// $param['event_tags']			    =   $this->request->getPost('event_tags');
-							$param['no_of_repeat']				= 	intOrNull($this->request->getPost('no_of_repeat'));
-							$param['location_name']				= 	$this->request->getPost('location_name');
-							$param['location_address']			= 	$this->request->getPost('location_address');
-							$param['latitude']					= 	$this->request->getPost('latitude');
-							$param['longitude']					= 	$this->request->getPost('longitude');
-							$param['website']					= 	$this->request->getPost('website');
-							$param['phone_number']				= 	$this->request->getPost('phone_number');
-							$param['venue_id']					= 	$this->request->getPost('venue_id');
-							//$param['jazz_types_id']				= 	$this->request->getPost('jazz_types_id');
-							$param['artist_id']				    = 	intOrNull($this->request->getPost('artist_id'));
-							$param['virtual_event_price']	    = 	floatOrNull($this->request->getPost('virtual_event_price'));
-							$param['virtual_event_link']	    = 	$this->request->getPost('virtual_event_link');
-							$param['cover_charge']				= 	$this->request->getPost('cover_charge');
-							$param['set_time']					= 	$this->request->getPost('set_time');
+			// Upload Cover Image
+			$coverFile = $this->request->getFile('cover_image');
+			if ($coverFile && $coverFile->isValid() && !$coverFile->hasMoved()) {
+				$newCoverName = $coverFile->getRandomName();
+				$coverFile->move('assets/front/img/eventimage', $newCoverName);
+				$param['cover_image'] = $newCoverName;
+			} elseif (!empty($postData['cover_existing_image'])) {
+				$param['cover_image'] = $postData['cover_existing_image']; // Retain existing cover image
+			}
+			$num_weeks = $this->request->getPost('no_of_repeat');
+			$start_date = $this->request->getPost('start_date');
 
-							$param['repeating_event']			= 	$this->request->getPost('repeating_event');
-							$param['live_stream'] = $this->request->getPost('live_stream') ? 1 : 0;
-							$param['frequecy']					= 	$this->request->getPost('frequecy');
-							$param['ip_address']				=	currentIp();
-							$param['created_by']				=	(int)$this->session->get('ILCADM_ADMIN_ID');
-							$param['creation_date']				= 	date('Y-m-d h:i:s');
-							$param['is_active']					=	'1';
-							$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
-							$param['is_featured']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
-							$param['free_concert']				= $this->request->getPost('free_concert') ? 1 : 0;
-							// Collect and encode the selected jazz types
-
-							$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
-							
-							$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
-
-
-							$event_tags_input = $this->request->getPost('event_tags');
-
-							if ($event_tags_input) {
-								$event_tags_array = array_map('trim', explode(',', $event_tags_input));
-								if (count($event_tags_array)) {
-									foreach ($event_tags_array as $event_tag) {
-										$p_array = [
-											'event_id' => $alastInsertId,
-											'event_tags' => $event_tag,
-											'is_active' => '1'
-										];
-
-										$save_events = $this->common_model->addData('event_tags_tbl', $p_array);
-									}
-								}
-							}
-							$jazz_types_ids = $this->request->getPost('jazz_types_id'); // Get the array of selected jazz types
-							if (!empty($jazz_types_ids)) {
-								foreach ($jazz_types_ids as $jazz_type_id) {
-									if(empty($jazz_type_id)) continue;
-									$jazz_data = [
-										'event_id' => $alastInsertId, // ID of the newly created event
-										'event_jazz_types_id' => $jazz_type_id, // ID of the selected jazz type
-									];
-									$this->common_model->addData('event_jazz_tbl', $jazz_data); // Insert into event_jazz_tbl
-								}
-							}
-							// if ($alastInsertId) {
-							// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
-						
-							// 	if (!empty($elast_event_data)) {
-							// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
-							// 	}
-							// }
-
-							$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
+			$endd_date = $this->request->getPost('end_date');
+			$week_dates = array();
+			if ($this->request->getPost('CurrentDataID') == '') :
+				if ($this->request->getPost('repeating_event') == 'Yes') {
+					for ($i = 0; $i < $num_weeks; $i++) {
+						if ($this->request->getPost('frequecy') == 'weekly') {
+							$week_start = date("Y-m-d", strtotime("+" . $i . " week", strtotime($start_date)));
+							$week_end = date("Y-m-d", strtotime("+" . ($i + 1) . " week - 1 day", strtotime($start_date)));
+							$week_dates[$i] =  $week_start;
+						} else {
+							$week_start = date("Y-m-d", strtotime("+" . $i . " day", strtotime($start_date)));
+							$week_dates[$i] = $week_start;
 						}
-					} else {
+
 
 						$param['event_title']				= 	$this->request->getPost('event_title');
 						$hour 								= 	$this->request->getPost('event_start_hour');
@@ -443,10 +328,9 @@ class Eventmanagement extends BaseController
 						$event_end_M						= 	$this->request->getPost('event_end_M');
 						$param['save_location_id']			= 	$this->request->getPost('save_location_id');
 						$param['description']				= 	$this->request->getPost('description');
-						$param['start_date']				= 	$this->request->getPost('start_date');
-						$param['end_date']					= 	$this->request->getPost('end_date');
+						$param['start_date']				= 	$week_start;
+						$param['end_date']					= 	$week_start;
 						$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
-						// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
 						$param['time_permission']			= 	$this->request->getPost('time_permission');
 						if ($param['time_permission'] == 'Yes') {
 
@@ -457,13 +341,13 @@ class Eventmanagement extends BaseController
 
 								$param['event_end_time'] = $start_time->format('h:i A');  // Format as HH:MM AM/PM
 							} catch (Exception $e) {
-
 								$param['event_end_time'] = 'Invalid time format';
 							}
 						} else {
-
 							$param['event_end_time'] = $hour_end . ':' . $min_end . ' ' . $event_end_M;
 						}
+						// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
+
 
 						$combined_date_and_time = $param['start_date'] . ' ' . $param['event_start_time'];
 						$param['date'] = strtotime($combined_date_and_time);
@@ -471,7 +355,7 @@ class Eventmanagement extends BaseController
 						$param['event_types']				=   $this->request->getPost('event_types');
 						$param['url']				        =   $this->request->getPost('url');
 						$param['cover_url']				    =   $this->request->getPost('cover_url');
-						$param['cover_image']				=  $this->request->getPost('cover_image');
+						$param['cover_image']			    =   $this->request->getPost('cover_image');
 						$param['video']				        =   $this->request->getPost('video');
 						$param['video2']				    =   $this->request->getPost('video2');
 						$param['video3']				    =   $this->request->getPost('video3');
@@ -500,40 +384,21 @@ class Eventmanagement extends BaseController
 						$param['ip_address']				=	currentIp();
 						$param['created_by']				=	(int)$this->session->get('ILCADM_ADMIN_ID');
 						$param['creation_date']				= 	date('Y-m-d h:i:s');
-						$param['is_active']					=	isset($data['EDITDATA']['is_active']) ? $data['EDITDATA']['is_active'] : '1';
-						$param['is_imported']					=	isset($data['EDITDATA']['is_imported']) ? $data['EDITDATA']['is_imported'] : '0';
+						$param['is_active']					=	'1';
 						$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
-						$param['is_featured ']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
-						$param['event_source']				= 	isset($data['EDITDATA']['event_source']) ? $data['EDITDATA']['event_source'] : '';
-						$param['event_source_id']			= 	isset($data['EDITDATA']['event_source_id']) ? $data['EDITDATA']['event_source_id'] : '';
-						$param['event_source_image']		= 	isset($data['EDITDATA']['event_source_image']) ? $data['EDITDATA']['event_source_image'] : '';
-						$param['free_concert']				=   $this->request->getPost('free_concert') ? 1 : 0;
-						
-						$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
+						$param['is_featured']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
+						$param['free_concert']				= $this->request->getPost('free_concert') ? 1 : 0;
 						// Collect and encode the selected jazz types
-						// Get the array of selected jazz types from the form
 
+						$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
 
+						$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
 
-						// If you want to store the comma-separated string for other purposes, you can do so
-						// For example, if you need to save it in a different table or for further processing
-						// $param['jazz_types'] = $jazz_types_string; // Just an example if you want to store it somewhere
-
-						//echo"<pre>";print_r($param['jazz_types_id']);die;
-						// echo"<pre>";print_r($param['event_start_time']);die;
-						$checkEvent						    =	$this->common_model->checkEvent($param['save_location_id'], $param['start_date'], $param['end_date'], $param['event_start_time'], $param['event_end_time']);
-						if ($checkEvent) {
-							$this->session->setFlashdata('alert_error', 'Event with same location, date and time already exists');
-						} else {
-							$alastInsertId					=	$this->common_model->addData('event_tbl', $param);
-						}
 
 						$event_tags_input = $this->request->getPost('event_tags');
 
 						if ($event_tags_input) {
-
 							$event_tags_array = array_map('trim', explode(',', $event_tags_input));
-
 							if (count($event_tags_array)) {
 								foreach ($event_tags_array as $event_tag) {
 									$p_array = [
@@ -541,201 +406,204 @@ class Eventmanagement extends BaseController
 										'event_tags' => $event_tag,
 										'is_active' => '1'
 									];
-									// echo "<pre>";print_r($p_array);die;
+
 									$save_events = $this->common_model->addData('event_tags_tbl', $p_array);
-									// echo "<pre>";print_r($save_events);die;
 								}
 							}
 						}
-						// Get the array of selected jazz types from the form
-
-
-						$jazz_types_ids = $this->request->getPost('jazz_types_id'); // This should come from your form
+						$jazz_types_ids = $this->request->getPost('jazz_types_id'); // Get the array of selected jazz types
 						if (!empty($jazz_types_ids)) {
-							// Assuming that 'jazz_types_id' is coming as an array from the form
 							foreach ($jazz_types_ids as $jazz_type_id) {
+								if (empty($jazz_type_id)) continue;
 								$jazz_data = [
-									'event_id' => $alastInsertId,
-									'event_jazz_types_id' => (int)$jazz_type_id, // Cast to integer
+									'event_id' => $alastInsertId, // ID of the newly created event
+									'event_jazz_types_id' => $jazz_type_id, // ID of the selected jazz type
 								];
-								// Insert into event_jazz_tbl
-								$this->common_model->addData('event_jazz_tbl', $jazz_data);
+								$this->common_model->addData('event_jazz_tbl', $jazz_data); // Insert into event_jazz_tbl
 							}
 						}
 						// if ($alastInsertId) {
 						// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
-						
+
 						// 	if (!empty($elast_event_data)) {
 						// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
 						// 	}
 						// }
 
-
-						// $jazz_types_ids = $this->request->getPost('jazz_types_id'); // Get the array of selected jazz types
-
-
-						// echo "<pre>";print_r($_POST);die;
 						$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
 					}
+				} else {
 
-				else :
+					$param['event_title']				= 	$this->request->getPost('event_title');
+					$hour 								= 	$this->request->getPost('event_start_hour');
+					$min								= 	$this->request->getPost('event_start_min');
+					$event_start_M						= 	$this->request->getPost('event_start_M');
+					$hour_end 							= 	$this->request->getPost('event_end_hour');
+					$min_end							= 	$this->request->getPost('event_end_min');
+					$event_end_M						= 	$this->request->getPost('event_end_M');
+					$param['save_location_id']			= 	$this->request->getPost('save_location_id');
+					$param['description']				= 	$this->request->getPost('description');
+					$param['start_date']				= 	$this->request->getPost('start_date');
+					$param['end_date']					= 	$this->request->getPost('end_date');
+					$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
+					// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
+					$param['time_permission']			= 	$this->request->getPost('time_permission');
+					if ($param['time_permission'] == 'Yes') {
 
-					$this->common_model->deleteData('event_tbl', 'event_id', (int)$editId);
-					$this->common_model->deleteData('event_jazz_tbl', 'event_id', (int)$editId);
-					// $this->elastichh->deleteSingleEventFromIndex('events', (int)$editId);
+						try {
+							$start_time = new DateTime("{$hour}:{$min} {$event_start_M}");
 
-					if ($this->request->getPost('repeating_event') == 'Yes') {
-						for ($i = 0; $i < $num_weeks; $i++) {
-							if ($this->request->getPost('frequecy') == 'weekly') {
-								$week_start = date("Y-m-d", strtotime("+" . $i . " week", strtotime($start_date)));
-								$week_end = date("Y-m-d", strtotime("+" . ($i + 1) . " week - 1 day", strtotime($start_date)));
+							$start_time->modify('+1 hour 30 minutes');
 
-								$week_endd = date("Y-m-d", strtotime("+" . $i . " week", strtotime($endd_date)));
-								$week_dates[$i] =  $week_start;
+							$param['event_end_time'] = $start_time->format('h:i A');  // Format as HH:MM AM/PM
+						} catch (Exception $e) {
 
-								$param['start_date']				= 	$week_start;
-								//$param['end_date']					= 	$week_end;
-								$param['end_date']					= 	$week_endd;
-							} else {
-								$week_start = date("Y-m-d", strtotime("+" . $i . " day", strtotime($start_date)));
-								$week_endd = date("Y-m-d", strtotime("+" . $i . " day", strtotime($endd_date)));
-								$week_dates[$i] = $week_start;
-								$param['start_date']				= 	$week_start;
-								//$param['end_date']					= 	$this->request->getPost('end_date');
-								$param['end_date']					= 	$week_endd;
-							}
-
-							$param['event_title']				= 	$this->request->getPost('event_title');
-							$hour 								= 	$this->request->getPost('event_start_hour');
-							$min								= 	$this->request->getPost('event_start_min');
-							$event_start_M						= 	$this->request->getPost('event_start_M');
-							$hour_end 							= 	$this->request->getPost('event_end_hour');
-							$min_end							= 	$this->request->getPost('event_end_min');
-							$event_end_M						= 	$this->request->getPost('event_end_M');
-							$param['save_location_id']			= 	$this->request->getPost('save_location_id');
-							$param['description']				= 	$this->request->getPost('description');
-							//$param['start_date']				= 	$week_start;
-							//$param['end_date']					= 	$week_start;
-							$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
-							$param['time_permission']			= 	$this->request->getPost('time_permission');
-							if ($param['time_permission'] == 'Yes') {
-
-								try {
-									$start_time = new DateTime("{$hour}:{$min} {$event_start_M}");
-
-									$start_time->modify('+1 hour 30 minutes');
-
-									$param['event_end_time'] = $start_time->format('h:i A');  // Format as HH:MM AM/PM
-								} catch (Exception $e) {
-
-									$param['event_end_time'] = 'Invalid time format';
-								}
-							} else {
-
-								$param['event_end_time'] = $hour_end . ':' . $min_end . ' ' . $event_end_M;
-							}
-							// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
-
-							$combined_date_and_time = $param['start_date'] . ' ' . $param['event_start_time'];
-							$param['date'] = strtotime($combined_date_and_time);
-
-							$param['event_types']				=   $this->request->getPost('event_types');
-							$param['url']				        =   $this->request->getPost('url');
-							$param['cover_url']				    =   $this->request->getPost('cover_url');
-							$param['cover_image']				    =   $this->request->getPost('cover_image');
-							$param['video']				        =   $this->request->getPost('video');
-							$param['video2']				    =   $this->request->getPost('video2');
-							$param['video3']				    =   $this->request->getPost('video3');
-							$param['qr_code_link']			    =   $this->request->getPost('qr_code_link');
-							$param['buy_now_link']			    =   $this->request->getPost('buy_now_link');
-							$param['reserve_seat_link']			=   $this->request->getPost('reserve_seat_link');
-							// $param['event_tags']			    =   $this->request->getPost('event_tags');
-							$param['no_of_repeat']				= 	intOrNull($this->request->getPost('no_of_repeat'));
-							$param['location_name']				= 	$this->request->getPost('location_name');
-							$param['location_address']			= 	$this->request->getPost('location_address');
-							$param['latitude']					= 	$this->request->getPost('latitude');
-							$param['longitude']					= 	$this->request->getPost('longitude');
-							$param['website']					= 	$this->request->getPost('website');
-							$param['phone_number']				= 	$this->request->getPost('phone_number');
-							$param['venue_id']					= 	$this->request->getPost('venue_id');
-							//$param['jazz_types_id']				= 	$this->request->getPost('jazz_types_id');
-							$param['artist_id']				    = 	intOrNull($this->request->getPost('artist_id'));
-							$param['virtual_event_price']	    = 	floatOrNull($this->request->getPost('virtual_event_price'));
-							$param['virtual_event_link']	    = 	$this->request->getPost('virtual_event_link');
-							$param['cover_charge']				= 	$this->request->getPost('cover_charge');
-							$param['set_time']					= 	$this->request->getPost('set_time');
-							// $param['time_permission']			= 	$this->request->getPost('time_permission');
-							$param['repeating_event']			= 	$this->request->getPost('repeating_event');
-							$param['live_stream'] = $this->request->getPost('live_stream') ? 1 : 0;
-							$param['frequecy']					= 	$this->request->getPost('frequecy');
-							$param['ip_address']				=	currentIp();
-							$param['created_by']				=	(int)$this->session->get('ILCADM_ADMIN_ID');
-							$param['creation_date']				= 	isset($data['EDITDATA']['creation_date']) ? $data['EDITDATA']['creation_date'] : '0';
-							// $param['is_active']					=	'1';
-							$param['is_active']				=	isset($data['EDITDATA']['is_active']) ? $data['EDITDATA']['is_active'] : '0';
-							$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
-							$param['is_featured ']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
-							$param['is_imported']					=	isset($data['EDITDATA']['is_imported']) ? $data['EDITDATA']['is_imported'] : '0';
-
-							$param['virtual_event']	    = 	$this->request->getPost('virtual_event');
-							$param['boost_days']	    = 	isset($data['EDITDATA']['boost_days']) ? $data['EDITDATA']['boost_days'] : '0';
-							if(!empty($data['EDITDATA']['boost_date'])) {
-								$param['boost_date']	= $data['EDITDATA']['boost_date'];
-							}
-							$param['requested_boost']	    = 	isset($data['EDITDATA']['requested_boost']) ? $data['EDITDATA']['requested_boost'] : '0';
-							$param['ticket_status_code']	    = 	isset($data['EDITDATA']['ticket_status_code']) ? $data['EDITDATA']['ticket_status_code'] : '0';
-
-							$param['event_source']				= 	isset($data['EDITDATA']['event_source']) ? $data['EDITDATA']['event_source'] : '';
-							$param['event_source_id']			= 	isset($data['EDITDATA']['event_source_id']) ? $data['EDITDATA']['event_source_id'] : '';
-							$param['event_source_image']		= 	isset($data['EDITDATA']['event_source_image']) ? $data['EDITDATA']['event_source_image'] : '';
-							$param['free_concert']				= $this->request->getPost('free_concert') ? 1 : 0;
-							
-							$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
-							// Collect and encode the selected jazz types
-							
-							$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
-
-							$event_tags_input = $this->request->getPost('event_tags');
-
-							if ($event_tags_input) {
-								$event_tags_array = array_map('trim', explode(',', $event_tags_input));
-
-								if (count($event_tags_array)) {
-									foreach ($event_tags_array as $event_tag) {
-										$p_array = [
-											'event_id' => $alastInsertId,
-											'event_tags' => $event_tag,
-											'is_active' => '1'
-										];
-
-										$save_events = $this->common_model->addData('event_tags_tbl', $p_array);
-									}
-								}
-							}
-							$jazz_types_ids = $this->request->getPost('jazz_types_id'); // This should come from your form
-							if (!empty($jazz_types_ids)) {
-								// Assuming that 'jazz_types_id' is coming as an array from the form
-								foreach ($jazz_types_ids as $jazz_type_id) {
-									$jazz_data = [
-										'event_id' => $alastInsertId,
-										'event_jazz_types_id' => (int)$jazz_type_id, // Cast to integer
-									];
-									// Insert into event_jazz_tbl
-									$this->common_model->addData('event_jazz_tbl', $jazz_data);
-								}
-							}
-							// if ($alastInsertId) {
-							// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
-						
-							// 	if (!empty($elast_event_data)) {
-							// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
-							// 	}
-							// }
-
-							$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
+							$param['event_end_time'] = 'Invalid time format';
 						}
 					} else {
 
+						$param['event_end_time'] = $hour_end . ':' . $min_end . ' ' . $event_end_M;
+					}
+
+					$combined_date_and_time = $param['start_date'] . ' ' . $param['event_start_time'];
+					$param['date'] = strtotime($combined_date_and_time);
+
+					$param['event_types']				=   $this->request->getPost('event_types');
+					$param['url']				        =   $this->request->getPost('url');
+					$param['cover_url']				    =   $this->request->getPost('cover_url');
+					$param['cover_image']				=  $this->request->getPost('cover_image');
+					$param['video']				        =   $this->request->getPost('video');
+					$param['video2']				    =   $this->request->getPost('video2');
+					$param['video3']				    =   $this->request->getPost('video3');
+					$param['qr_code_link']			    =   $this->request->getPost('qr_code_link');
+					$param['buy_now_link']			    =   $this->request->getPost('buy_now_link');
+					$param['reserve_seat_link']			=   $this->request->getPost('reserve_seat_link');
+					// $param['event_tags']			    =   $this->request->getPost('event_tags');
+					$param['no_of_repeat']				= 	intOrNull($this->request->getPost('no_of_repeat'));
+					$param['location_name']				= 	$this->request->getPost('location_name');
+					$param['location_address']			= 	$this->request->getPost('location_address');
+					$param['latitude']					= 	$this->request->getPost('latitude');
+					$param['longitude']					= 	$this->request->getPost('longitude');
+					$param['website']					= 	$this->request->getPost('website');
+					$param['phone_number']				= 	$this->request->getPost('phone_number');
+					$param['venue_id']					= 	$this->request->getPost('venue_id');
+					//$param['jazz_types_id']				= 	$this->request->getPost('jazz_types_id');
+					$param['artist_id']				    = 	intOrNull($this->request->getPost('artist_id'));
+					$param['virtual_event_price']	    = 	floatOrNull($this->request->getPost('virtual_event_price'));
+					$param['virtual_event_link']	    = 	$this->request->getPost('virtual_event_link');
+					$param['cover_charge']				= 	$this->request->getPost('cover_charge');
+					$param['set_time']					= 	$this->request->getPost('set_time');
+
+					$param['repeating_event']			= 	$this->request->getPost('repeating_event');
+					$param['live_stream'] = $this->request->getPost('live_stream') ? 1 : 0;
+					$param['frequecy']					= 	$this->request->getPost('frequecy');
+					$param['ip_address']				=	currentIp();
+					$param['created_by']				=	(int)$this->session->get('ILCADM_ADMIN_ID');
+					$param['creation_date']				= 	date('Y-m-d h:i:s');
+					$param['is_active']					=	isset($data['EDITDATA']['is_active']) ? $data['EDITDATA']['is_active'] : '1';
+					$param['is_imported']					=	isset($data['EDITDATA']['is_imported']) ? $data['EDITDATA']['is_imported'] : '0';
+					$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
+					$param['is_featured ']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
+					$param['event_source']				= 	isset($data['EDITDATA']['event_source']) ? $data['EDITDATA']['event_source'] : '';
+					$param['event_source_id']			= 	isset($data['EDITDATA']['event_source_id']) ? $data['EDITDATA']['event_source_id'] : '';
+					$param['event_source_image']		= 	isset($data['EDITDATA']['event_source_image']) ? $data['EDITDATA']['event_source_image'] : '';
+					$param['free_concert']				=   $this->request->getPost('free_concert') ? 1 : 0;
+
+					$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
+					// Collect and encode the selected jazz types
+					// Get the array of selected jazz types from the form
+
+
+
+					// If you want to store the comma-separated string for other purposes, you can do so
+					// For example, if you need to save it in a different table or for further processing
+					// $param['jazz_types'] = $jazz_types_string; // Just an example if you want to store it somewhere
+
+					//echo"<pre>";print_r($param['jazz_types_id']);die;
+					// echo"<pre>";print_r($param['event_start_time']);die;
+					$checkEvent						    =	$this->common_model->checkEvent($param['save_location_id'], $param['start_date'], $param['end_date'], $param['event_start_time'], $param['event_end_time']);
+					if ($checkEvent) {
+						$this->session->setFlashdata('alert_error', 'Event with same location, date and time already exists');
+					} else {
+						$alastInsertId					=	$this->common_model->addData('event_tbl', $param);
+					}
+
+					$event_tags_input = $this->request->getPost('event_tags');
+
+					if ($event_tags_input) {
+
+						$event_tags_array = array_map('trim', explode(',', $event_tags_input));
+
+						if (count($event_tags_array)) {
+							foreach ($event_tags_array as $event_tag) {
+								$p_array = [
+									'event_id' => $alastInsertId,
+									'event_tags' => $event_tag,
+									'is_active' => '1'
+								];
+								// echo "<pre>";print_r($p_array);die;
+								$save_events = $this->common_model->addData('event_tags_tbl', $p_array);
+								// echo "<pre>";print_r($save_events);die;
+							}
+						}
+					}
+					// Get the array of selected jazz types from the form
+
+
+					$jazz_types_ids = $this->request->getPost('jazz_types_id'); // This should come from your form
+					if (!empty($jazz_types_ids)) {
+						// Assuming that 'jazz_types_id' is coming as an array from the form
+						foreach ($jazz_types_ids as $jazz_type_id) {
+							$jazz_data = [
+								'event_id' => $alastInsertId,
+								'event_jazz_types_id' => (int)$jazz_type_id, // Cast to integer
+							];
+							// Insert into event_jazz_tbl
+							$this->common_model->addData('event_jazz_tbl', $jazz_data);
+						}
+					}
+					// if ($alastInsertId) {
+					// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
+
+					// 	if (!empty($elast_event_data)) {
+					// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
+					// 	}
+					// }
+
+
+					// $jazz_types_ids = $this->request->getPost('jazz_types_id'); // Get the array of selected jazz types
+
+
+					// echo "<pre>";print_r($_POST);die;
+					$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
+				}
+
+			else :
+
+				$this->common_model->deleteData('event_tbl', 'event_id', (int)$editId);
+				$this->common_model->deleteData('event_jazz_tbl', 'event_id', (int)$editId);
+				// $this->elastichh->deleteSingleEventFromIndex('events', (int)$editId);
+
+				if ($this->request->getPost('repeating_event') == 'Yes') {
+					for ($i = 0; $i < $num_weeks; $i++) {
+						if ($this->request->getPost('frequecy') == 'weekly') {
+							$week_start = date("Y-m-d", strtotime("+" . $i . " week", strtotime($start_date)));
+							$week_end = date("Y-m-d", strtotime("+" . ($i + 1) . " week - 1 day", strtotime($start_date)));
+
+							$week_endd = date("Y-m-d", strtotime("+" . $i . " week", strtotime($endd_date)));
+							$week_dates[$i] =  $week_start;
+
+							$param['start_date']				= 	$week_start;
+							//$param['end_date']					= 	$week_end;
+							$param['end_date']					= 	$week_endd;
+						} else {
+							$week_start = date("Y-m-d", strtotime("+" . $i . " day", strtotime($start_date)));
+							$week_endd = date("Y-m-d", strtotime("+" . $i . " day", strtotime($endd_date)));
+							$week_dates[$i] = $week_start;
+							$param['start_date']				= 	$week_start;
+							//$param['end_date']					= 	$this->request->getPost('end_date');
+							$param['end_date']					= 	$week_endd;
+						}
 
 						$param['event_title']				= 	$this->request->getPost('event_title');
 						$hour 								= 	$this->request->getPost('event_start_hour');
@@ -746,8 +614,8 @@ class Eventmanagement extends BaseController
 						$event_end_M						= 	$this->request->getPost('event_end_M');
 						$param['save_location_id']			= 	$this->request->getPost('save_location_id');
 						$param['description']				= 	$this->request->getPost('description');
-						$param['start_date']				= 	$this->request->getPost('start_date');
-						$param['end_date']					= 	$this->request->getPost('end_date');
+						//$param['start_date']				= 	$week_start;
+						//$param['end_date']					= 	$week_start;
 						$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
 						$param['time_permission']			= 	$this->request->getPost('time_permission');
 						if ($param['time_permission'] == 'Yes') {
@@ -757,7 +625,7 @@ class Eventmanagement extends BaseController
 
 								$start_time->modify('+1 hour 30 minutes');
 
-								$param['event_end_time'] = $start_time->format('h:i A');
+								$param['event_end_time'] = $start_time->format('h:i A');  // Format as HH:MM AM/PM
 							} catch (Exception $e) {
 
 								$param['event_end_time'] = 'Invalid time format';
@@ -796,7 +664,7 @@ class Eventmanagement extends BaseController
 						$param['virtual_event_link']	    = 	$this->request->getPost('virtual_event_link');
 						$param['cover_charge']				= 	$this->request->getPost('cover_charge');
 						$param['set_time']					= 	$this->request->getPost('set_time');
-
+						// $param['time_permission']			= 	$this->request->getPost('time_permission');
 						$param['repeating_event']			= 	$this->request->getPost('repeating_event');
 						$param['live_stream'] = $this->request->getPost('live_stream') ? 1 : 0;
 						$param['frequecy']					= 	$this->request->getPost('frequecy');
@@ -808,9 +676,10 @@ class Eventmanagement extends BaseController
 						$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
 						$param['is_featured ']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
 						$param['is_imported']					=	isset($data['EDITDATA']['is_imported']) ? $data['EDITDATA']['is_imported'] : '0';
+
 						$param['virtual_event']	    = 	$this->request->getPost('virtual_event');
 						$param['boost_days']	    = 	isset($data['EDITDATA']['boost_days']) ? $data['EDITDATA']['boost_days'] : '0';
-						if(!empty($data['EDITDATA']['boost_date'])) {
+						if (!empty($data['EDITDATA']['boost_date'])) {
 							$param['boost_date']	= $data['EDITDATA']['boost_date'];
 						}
 						$param['requested_boost']	    = 	isset($data['EDITDATA']['requested_boost']) ? $data['EDITDATA']['requested_boost'] : '0';
@@ -822,7 +691,8 @@ class Eventmanagement extends BaseController
 						$param['free_concert']				= $this->request->getPost('free_concert') ? 1 : 0;
 
 						$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
-						
+						// Collect and encode the selected jazz types
+
 						$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
 
 						$event_tags_input = $this->request->getPost('event_tags');
@@ -846,7 +716,6 @@ class Eventmanagement extends BaseController
 						if (!empty($jazz_types_ids)) {
 							// Assuming that 'jazz_types_id' is coming as an array from the form
 							foreach ($jazz_types_ids as $jazz_type_id) {
-								if(empty($jazz_type_id)) continue;
 								$jazz_data = [
 									'event_id' => $alastInsertId,
 									'event_jazz_types_id' => (int)$jazz_type_id, // Cast to integer
@@ -855,25 +724,156 @@ class Eventmanagement extends BaseController
 								$this->common_model->addData('event_jazz_tbl', $jazz_data);
 							}
 						}
-
-						$this->common_model->deleteEventTags($editId);
 						// if ($alastInsertId) {
 						// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
-						
+
 						// 	if (!empty($elast_event_data)) {
 						// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
 						// 	}
 						// }
+
 						$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
 					}
-					$this->session->setFlashdata('alert_success', lang('statictext_lang.updatesuccess'));
-				endif;
-				return redirect()->to(getCurrentControllerPath('index'));
-				// echo"<pre>";print_r($_POST);die;
-				// return redirect()->to(correctLink('userILCADMData', getCurrentControllerPath('index')));
-				// return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+				} else {
+
+
+					$param['event_title']				= 	$this->request->getPost('event_title');
+					$hour 								= 	$this->request->getPost('event_start_hour');
+					$min								= 	$this->request->getPost('event_start_min');
+					$event_start_M						= 	$this->request->getPost('event_start_M');
+					$hour_end 							= 	$this->request->getPost('event_end_hour');
+					$min_end							= 	$this->request->getPost('event_end_min');
+					$event_end_M						= 	$this->request->getPost('event_end_M');
+					$param['save_location_id']			= 	$this->request->getPost('save_location_id');
+					$param['description']				= 	$this->request->getPost('description');
+					$param['start_date']				= 	$this->request->getPost('start_date');
+					$param['end_date']					= 	$this->request->getPost('end_date');
+					$param['event_start_time']			= 	$hour . ':' . $min . ' ' . $event_start_M;
+					$param['time_permission']			= 	$this->request->getPost('time_permission');
+					if ($param['time_permission'] == 'Yes') {
+
+						try {
+							$start_time = new DateTime("{$hour}:{$min} {$event_start_M}");
+
+							$start_time->modify('+1 hour 30 minutes');
+
+							$param['event_end_time'] = $start_time->format('h:i A');
+						} catch (Exception $e) {
+
+							$param['event_end_time'] = 'Invalid time format';
+						}
+					} else {
+
+						$param['event_end_time'] = $hour_end . ':' . $min_end . ' ' . $event_end_M;
+					}
+					// $param['event_end_time']            = 	$hour_end . ':' . $min_end . ' ' . $event_end_M;
+
+					$combined_date_and_time = $param['start_date'] . ' ' . $param['event_start_time'];
+					$param['date'] = strtotime($combined_date_and_time);
+
+					$param['event_types']				=   $this->request->getPost('event_types');
+					$param['url']				        =   $this->request->getPost('url');
+					$param['cover_url']				    =   $this->request->getPost('cover_url');
+					$param['cover_image']				    =   $this->request->getPost('cover_image');
+					$param['video']				        =   $this->request->getPost('video');
+					$param['video2']				    =   $this->request->getPost('video2');
+					$param['video3']				    =   $this->request->getPost('video3');
+					$param['qr_code_link']			    =   $this->request->getPost('qr_code_link');
+					$param['buy_now_link']			    =   $this->request->getPost('buy_now_link');
+					$param['reserve_seat_link']			=   $this->request->getPost('reserve_seat_link');
+					// $param['event_tags']			    =   $this->request->getPost('event_tags');
+					$param['no_of_repeat']				= 	intOrNull($this->request->getPost('no_of_repeat'));
+					$param['location_name']				= 	$this->request->getPost('location_name');
+					$param['location_address']			= 	$this->request->getPost('location_address');
+					$param['latitude']					= 	$this->request->getPost('latitude');
+					$param['longitude']					= 	$this->request->getPost('longitude');
+					$param['website']					= 	$this->request->getPost('website');
+					$param['phone_number']				= 	$this->request->getPost('phone_number');
+					$param['venue_id']					= 	$this->request->getPost('venue_id');
+					//$param['jazz_types_id']				= 	$this->request->getPost('jazz_types_id');
+					$param['artist_id']				    = 	intOrNull($this->request->getPost('artist_id'));
+					$param['virtual_event_price']	    = 	floatOrNull($this->request->getPost('virtual_event_price'));
+					$param['virtual_event_link']	    = 	$this->request->getPost('virtual_event_link');
+					$param['cover_charge']				= 	$this->request->getPost('cover_charge');
+					$param['set_time']					= 	$this->request->getPost('set_time');
+
+					$param['repeating_event']			= 	$this->request->getPost('repeating_event');
+					$param['live_stream'] = $this->request->getPost('live_stream') ? 1 : 0;
+					$param['frequecy']					= 	$this->request->getPost('frequecy');
+					$param['ip_address']				=	currentIp();
+					$param['created_by']				=	(int)$this->session->get('ILCADM_ADMIN_ID');
+					$param['creation_date']				= 	isset($data['EDITDATA']['creation_date']) ? $data['EDITDATA']['creation_date'] : '0';
+					// $param['is_active']					=	'1';
+					$param['is_active']				=	isset($data['EDITDATA']['is_active']) ? $data['EDITDATA']['is_active'] : '0';
+					$param['is_boosted']				=	isset($data['EDITDATA']['is_boosted']) ? $data['EDITDATA']['is_boosted'] : '0';
+					$param['is_featured ']				=	isset($data['EDITDATA']['is_featured']) ? $data['EDITDATA']['is_featured'] : '0';
+					$param['is_imported']					=	isset($data['EDITDATA']['is_imported']) ? $data['EDITDATA']['is_imported'] : '0';
+					$param['virtual_event']	    = 	$this->request->getPost('virtual_event');
+					$param['boost_days']	    = 	isset($data['EDITDATA']['boost_days']) ? $data['EDITDATA']['boost_days'] : '0';
+					if (!empty($data['EDITDATA']['boost_date'])) {
+						$param['boost_date']	= $data['EDITDATA']['boost_date'];
+					}
+					$param['requested_boost']	    = 	isset($data['EDITDATA']['requested_boost']) ? $data['EDITDATA']['requested_boost'] : '0';
+					$param['ticket_status_code']	    = 	isset($data['EDITDATA']['ticket_status_code']) ? $data['EDITDATA']['ticket_status_code'] : '0';
+
+					$param['event_source']				= 	isset($data['EDITDATA']['event_source']) ? $data['EDITDATA']['event_source'] : '';
+					$param['event_source_id']			= 	isset($data['EDITDATA']['event_source_id']) ? $data['EDITDATA']['event_source_id'] : '';
+					$param['event_source_image']		= 	isset($data['EDITDATA']['event_source_image']) ? $data['EDITDATA']['event_source_image'] : '';
+					$param['free_concert']				= $this->request->getPost('free_concert') ? 1 : 0;
+
+					$param['added_by'] = !empty($data['EDITDATA']['added_by']) ? $data['EDITDATA']['added_by'] : 'admin';
+
+					$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
+
+					$event_tags_input = $this->request->getPost('event_tags');
+
+					if ($event_tags_input) {
+						$event_tags_array = array_map('trim', explode(',', $event_tags_input));
+
+						if (count($event_tags_array)) {
+							foreach ($event_tags_array as $event_tag) {
+								$p_array = [
+									'event_id' => $alastInsertId,
+									'event_tags' => $event_tag,
+									'is_active' => '1'
+								];
+
+								$save_events = $this->common_model->addData('event_tags_tbl', $p_array);
+							}
+						}
+					}
+					$jazz_types_ids = $this->request->getPost('jazz_types_id'); // This should come from your form
+					if (!empty($jazz_types_ids)) {
+						// Assuming that 'jazz_types_id' is coming as an array from the form
+						foreach ($jazz_types_ids as $jazz_type_id) {
+							if (empty($jazz_type_id)) continue;
+							$jazz_data = [
+								'event_id' => $alastInsertId,
+								'event_jazz_types_id' => (int)$jazz_type_id, // Cast to integer
+							];
+							// Insert into event_jazz_tbl
+							$this->common_model->addData('event_jazz_tbl', $jazz_data);
+						}
+					}
+
+					$this->common_model->deleteEventTags($editId);
+					// if ($alastInsertId) {
+					// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
+
+					// 	if (!empty($elast_event_data)) {
+					// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
+					// 	}
+					// }
+					$this->session->setFlashdata('alert_success', lang('statictext_lang.addsuccess'));
+				}
+				$this->session->setFlashdata('alert_success', lang('statictext_lang.updatesuccess'));
 			endif;
-		
+			return redirect()->to(getCurrentControllerPath('index'));
+		// echo"<pre>";print_r($_POST);die;
+		// return redirect()->to(correctLink('userILCADMData', getCurrentControllerPath('index')));
+		// return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+		endif;
+
 		$data['location'] = $this->common_model->getLocation(false);
 		$data['venues'] = $this->common_model->getCategory(false);
 		// echo "<pre>"; print_r($data['venues']); die();
@@ -1133,7 +1133,7 @@ class Eventmanagement extends BaseController
 		$alastInsertId						=	$this->common_model->addData('event_tbl', $param);
 		// if ($alastInsertId) {
 		// 	$elast_event_data = $this->elastic_model->getEventFromId($alastInsertId);
-		
+
 		// 	if (!empty($elast_event_data)) {
 		// 		$this->elastichh->addUpdateSingleEvent($elast_event_data);
 		// 	}
@@ -1336,124 +1336,124 @@ class Eventmanagement extends BaseController
 
 
 
-		public function import()
-		{
-			
-			$data['error'] = '';
-			$data['activeMenu'] = 'eventmanagement';
-			$data['activeSubMenu'] = 'eventmanagement';
-	
-			if ($this->request->getPost('SaveChanges')) {
-				$validation = \Config\Services::validation();
-				$validation->setRules([
-					'import_file' => 'uploaded[import_file]|max_size[import_file,256]|ext_in[import_file,xls,xlsx,csv]'
-				]);
-	
-				if ($validation->withRequest($this->request)->run()) {
-					$file = $this->request->getFile('import_file');
-	
-					if (!$file->isValid()) {
-						session()->setFlashdata('alert_error', $file->getErrorString());
-						return redirect()->to(correctLink('userILCADMData', getCurrentControllerPath('event/import')));
-					}
-	
-					$newName = $file->getRandomName();
-					$file->move('./assets/admin/document/', $newName);
-					$filePath = './assets/admin/document/' . $newName;
-	
-					$spreadsheet = IOFactory::load($filePath);
-					$sheet = $spreadsheet->getActiveSheet();
-					$highestRow = $sheet->getHighestRow();
-	
-					// Insert filename into import table
-					$importData = [
-						'import_file' => $newName,
-						'is_active' => "1"
-					];
-					$this->common_model->addData('import_tbl', $importData);
-	
-					for ($row = 2; $row <= $highestRow; $row++) {
-						$eventData = [
-							'event_title'  => $sheet->getCell("A$row")->getValue(),
-							'description'  => $sheet->getCell("B$row")->getValue(),
-							'location_name' => $sheet->getCell("C$row")->getValue(),
-							'location_address' => $sheet->getCell("D$row")->getValue(),
-							'latitude' => $sheet->getCell("E$row")->getValue(),
-							'longitude' => $sheet->getCell("F$row")->getValue(),
-							'venue_id' => $sheet->getCell("G$row")->getValue(),
-							'start_date' => $this->parseDate($sheet->getCell("H$row")->getValue()),
-							'end_date' => $this->parseDate($sheet->getCell("I$row")->getValue()),
-							'event_start_time' => NumberFormat::toFormattedString($sheet->getCell("J$row")->getValue(), 'hh:mm:ss'),
-							'event_end_time' => NumberFormat::toFormattedString($sheet->getCell("K$row")->getValue(), 'hh:mm:ss'),
-							'time_permission' => $sheet->getCell("L$row")->getValue(),
-							'repeating_event' => $sheet->getCell("M$row")->getValue(),
-							'website' => $sheet->getCell("N$row")->getValue(),
-							'phone_number' => $sheet->getCell("O$row")->getValue(),
-							'is_active' => "1",
-							'set_time' => $sheet->getCell("Q$row")->getValue(),
-							'cover_charge' => $sheet->getCell("R$row")->getValue(),
-							'buy_now_link' => $sheet->getCell("S$row")->getValue(),
-							'reserve_seat_link' => $sheet->getCell("T$row")->getValue(),
-							'event_tags' => $sheet->getCell("U$row")->getValue(),
-							'jazz_types_id' => $sheet->getCell("V$row")->getValue(),
-							'video' => $sheet->getCell("W$row")->getValue(),
-							'video2' => $sheet->getCell("X$row")->getValue(),
-							'video3' => $sheet->getCell("Y$row")->getValue(),
-							'artist_id' => $sheet->getCell("Z$row")->getValue(),
-							'virtual_event' => $sheet->getCell("AA$row")->getValue() ?? null,
-							'virtual_event_price' => $sheet->getCell("AB$row")->getValue() ?? null,
-							'virtual_event_link' => $sheet->getCell("AC$row")->getValue() ?? null,
+	public function import()
+	{
 
-						];
-	
-						$eventData['save_location_id'] = $this->getLocationId($eventData['location_name']);
-						$eventData['venue_id'] = $this->getVenueId($eventData['venue_id']);
-						$eventData['jazz_types_id'] = $this->getJazzTypeId($eventData['jazz_types_id']);
-						$eventData['artist_id'] = $this->getArtistId($eventData['artist_id']);
-	
-						$this->common_model->addData('event_tbl', $eventData);
-					}
-	
-					session()->setFlashdata('alert_success', 'Events imported successfully.');
-					//return redirect()->to(base_url('event/import'));
-					//return redirect()->to(getCurrentControllerPath('import'));
+		$data['error'] = '';
+		$data['activeMenu'] = 'eventmanagement';
+		$data['activeSubMenu'] = 'eventmanagement';
+
+		if ($this->request->getPost('SaveChanges')) {
+			$validation = \Config\Services::validation();
+			$validation->setRules([
+				'import_file' => 'uploaded[import_file]|max_size[import_file,256]|ext_in[import_file,xls,xlsx,csv]'
+			]);
+
+			if ($validation->withRequest($this->request)->run()) {
+				$file = $this->request->getFile('import_file');
+
+				if (!$file->isValid()) {
+					session()->setFlashdata('alert_error', $file->getErrorString());
 					return redirect()->to(correctLink('userILCADMData', getCurrentControllerPath('event/import')));
 				}
+
+				$newName = $file->getRandomName();
+				$file->move('./assets/admin/document/', $newName);
+				$filePath = './assets/admin/document/' . $newName;
+
+				$spreadsheet = IOFactory::load($filePath);
+				$sheet = $spreadsheet->getActiveSheet();
+				$highestRow = $sheet->getHighestRow();
+
+				// Insert filename into import table
+				$importData = [
+					'import_file' => $newName,
+					'is_active' => "1"
+				];
+				$this->common_model->addData('import_tbl', $importData);
+
+				for ($row = 2; $row <= $highestRow; $row++) {
+					$eventData = [
+						'event_title'  => $sheet->getCell("A$row")->getValue(),
+						'description'  => $sheet->getCell("B$row")->getValue(),
+						'location_name' => $sheet->getCell("C$row")->getValue(),
+						'location_address' => $sheet->getCell("D$row")->getValue(),
+						'latitude' => $sheet->getCell("E$row")->getValue(),
+						'longitude' => $sheet->getCell("F$row")->getValue(),
+						'venue_id' => $sheet->getCell("G$row")->getValue(),
+						'start_date' => $this->parseDate($sheet->getCell("H$row")->getValue()),
+						'end_date' => $this->parseDate($sheet->getCell("I$row")->getValue()),
+						'event_start_time' => NumberFormat::toFormattedString($sheet->getCell("J$row")->getValue(), 'hh:mm:ss'),
+						'event_end_time' => NumberFormat::toFormattedString($sheet->getCell("K$row")->getValue(), 'hh:mm:ss'),
+						'time_permission' => $sheet->getCell("L$row")->getValue(),
+						'repeating_event' => $sheet->getCell("M$row")->getValue(),
+						'website' => $sheet->getCell("N$row")->getValue(),
+						'phone_number' => $sheet->getCell("O$row")->getValue(),
+						'is_active' => "1",
+						'set_time' => $sheet->getCell("Q$row")->getValue(),
+						'cover_charge' => $sheet->getCell("R$row")->getValue(),
+						'buy_now_link' => $sheet->getCell("S$row")->getValue(),
+						'reserve_seat_link' => $sheet->getCell("T$row")->getValue(),
+						'event_tags' => $sheet->getCell("U$row")->getValue(),
+						'jazz_types_id' => $sheet->getCell("V$row")->getValue(),
+						'video' => $sheet->getCell("W$row")->getValue(),
+						'video2' => $sheet->getCell("X$row")->getValue(),
+						'video3' => $sheet->getCell("Y$row")->getValue(),
+						'artist_id' => $sheet->getCell("Z$row")->getValue(),
+						'virtual_event' => $sheet->getCell("AA$row")->getValue() ?? null,
+						'virtual_event_price' => $sheet->getCell("AB$row")->getValue() ?? null,
+						'virtual_event_link' => $sheet->getCell("AC$row")->getValue() ?? null,
+
+					];
+
+					$eventData['save_location_id'] = $this->getLocationId($eventData['location_name']);
+					$eventData['venue_id'] = $this->getVenueId($eventData['venue_id']);
+					$eventData['jazz_types_id'] = $this->getJazzTypeId($eventData['jazz_types_id']);
+					$eventData['artist_id'] = $this->getArtistId($eventData['artist_id']);
+
+					$this->common_model->addData('event_tbl', $eventData);
+				}
+
+				session()->setFlashdata('alert_success', 'Events imported successfully.');
+				//return redirect()->to(base_url('event/import'));
+				//return redirect()->to(getCurrentControllerPath('import'));
+				return redirect()->to(correctLink('userILCADMData', getCurrentControllerPath('event/import')));
 			}
-			$this->layouts->set_title('Manage Import');
-			$this->layouts->admin_view('event/import');
 		}
-	
-		private function parseDate($dateValue)
-		{
-			return date('Y-m-d', strtotime($dateValue));
-		}
-	
-		private function getLocationId($locationName)
-		{
-			$locationData = $this->common_model->getDataByParticularField('event_location_tbl', 'location_name', $locationName);
-			return $locationData ? $locationData['id'] : null;
-		}
-	
-		private function getVenueId($venueTitle)
-		{
-			$venueData = $this->common_model->getDataByParticularField('venue_tbl', 'venue_title', $venueTitle);
-			return $venueData ? $venueData['id'] : null;
-		}
-	
-		private function getJazzTypeId($jazzTypeName)
-		{
-			$jazzTypeData = $this->common_model->getDataByParticularField('jazz_types', 'name', $jazzTypeName);
-			return $jazzTypeData ? $jazzTypeData['id'] : null;
-		}
-	
-		private function getArtistId($artistName)
-		{
-			$artistData = $this->common_model->getDataByParticularField('artist_tbl', 'artist_name', $artistName);
-			return $artistData ? $artistData['id'] : null;
-		}
-	
-	
+		$this->layouts->set_title('Manage Import');
+		$this->layouts->admin_view('event/import');
+	}
+
+	private function parseDate($dateValue)
+	{
+		return date('Y-m-d', strtotime($dateValue));
+	}
+
+	private function getLocationId($locationName)
+	{
+		$locationData = $this->common_model->getDataByParticularField('event_location_tbl', 'location_name', $locationName);
+		return $locationData ? $locationData['id'] : null;
+	}
+
+	private function getVenueId($venueTitle)
+	{
+		$venueData = $this->common_model->getDataByParticularField('venue_tbl', 'venue_title', $venueTitle);
+		return $venueData ? $venueData['id'] : null;
+	}
+
+	private function getJazzTypeId($jazzTypeName)
+	{
+		$jazzTypeData = $this->common_model->getDataByParticularField('jazz_types', 'name', $jazzTypeName);
+		return $jazzTypeData ? $jazzTypeData['id'] : null;
+	}
+
+	private function getArtistId($artistName)
+	{
+		$artistData = $this->common_model->getDataByParticularField('artist_tbl', 'artist_name', $artistName);
+		return $artistData ? $artistData['id'] : null;
+	}
+
+
 
 	// private function convertTime($timeStr)
 	// {

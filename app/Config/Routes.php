@@ -161,7 +161,6 @@ else :
 		$routes->get('archive-events', 'Home::archive_events');
 		$routes->get('inactive-events-festivals', 'Home::inactive_events_festivals');
 		$routes->get('delete-event-index/(:any)', 'Home::delete_event_index');
-
 		$routes->post('save-report-problem', 'Home::save_report_problem');
 
 
@@ -170,7 +169,7 @@ else :
 		$route['current_isssue_of_magazine'] 	        = 	'home/current_isssue_of_magazine';
 		$route['current_issue'] 	        = 	'home/current_issue';
 
-		$route['test'] 							= 	'home/test';
+		// $route['test'] 							= 	'home/test';
 		////////////////////	ABOUT	////////////////////
 		$route['about'] 						= 	'front/about/index';
 		////////////////////	how-to-get-hh	////////////////////
@@ -277,10 +276,10 @@ else :
 		$route['bloglist/(:num)'] 				    = 	'front/bloglist/index';
 		$routes->get('blog_detail/(:any)', 'front\Blog_detail::index/$1');
 		$routes->get('event_detail/(:any)', 'front\Event_detail::index/$1');
-
 		$routes->get('festival_detail/(:any)', 'front\Festival_detail::index/$1');
 		$routes->get('privacy-policy', 'Home::privacypolicy');
 		$routes->get('refund-policy', 'Home::refundpolicy');
+
 		// $route['get-permission-data'] 			= 	'admin/usermanagement/get_permission_data';
 		$route['mutlipleChangeStatus']              =   'admin/eventmanagement/mutlipleChangeStatus';
 		$route['mutlipleChangeStatus']              =   'admin/adminmanagefestivals/mutlipleChangeStatus';
@@ -313,10 +312,11 @@ else :
 		$routes->get('event_scrapping', 'front\Event_scrapping::index');
 		$routes->get('event_scrapping_detail/(:any)', 'front\Event_scrapping::event_scrapping_detail/$1');
 		$routes->get('import-tk-events', 'front\Ticketmaster::importEvents');
-		$routes->get('earch/calendar-filter-artist', 'front\Elastic::calendar_filter_artist');
+		$routes->get('search/calendar-filter-artist', 'front\Elastic::calendar_filter_artist');
 		// $route['global-search/(:any)'] 			               = 	'front/elastic/global_search/$1';
 		$routes->get('global-search/(:any)', 'front\Elastic::global_search/$1');
 		$routes->post('global-search-filters', 'front\Elastic::global_search_filters');
+
 		$routes->get('hhjsitemgmt/adminmanageeventreport/download_pdf', 'hhjsitemgmt\Adminmanageeventreport::download_pdf');
 		$routes->get('hhjsitemgmt/adminmanageeventreport/download_new_pdf', 'hhjsitemgmt\Adminmanageeventreport::download_new_pdf');
 		$routes->get('hhjsitemgmt/adminmanageeventreport/export_excel', 'hhjsitemgmt\AdminManageEventReport::export_excel', ['as' => 'export_excel']);
