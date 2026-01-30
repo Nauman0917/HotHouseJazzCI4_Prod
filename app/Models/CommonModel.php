@@ -9,23 +9,45 @@ class CommonModel extends Model
     protected $db;
     protected $archiveddb;
     protected array $allowedFieldsMap = [
-        'id'               => 'el.id',
-        'venue_id'         => 'el.venue_id',
-        'location_name'    => 'el.location_name',
+        'id' => 'el.id',
+        'venue_id' => 'el.venue_id',
+        'location_name' => 'el.location_name',
         'location_address' => 'el.location_address',
-        'state'            => 'el.state',
-        'county'           => 'el.county',
-        'is_active'        => 'el.is_active',
-        'location_source'  => 'el.location_source',
+        'state' => 'el.state',
+        'county' => 'el.county',
+        'is_active' => 'el.is_active',
+        'location_source' => 'el.location_source',
     ];
-
 
     public function __construct()
     {
-
         $this->db = \Config\Database::connect();
         $this->archiveddb = \Config\Database::connect('archivedDB');
     }
+
+    private function getTableColumns(string $table): array
+    {
+        static $cache = [];
+
+        if (strpos($table, '.') !== false) {
+            [, $table] = explode('.', $table, 2);
+        }
+
+        if (isset($cache[$table])) {
+            return $cache[$table];
+        }
+
+        try {
+            $fields = $this->db->getFieldNames($table);
+        } catch (\Throwable $e) {
+            $fields = [];
+        }
+
+        $cache[$table] = is_array($fields) ? $fields : [];
+
+        return $cache[$table];
+    }
+
 
     /***********************************************************************
      ** Function name : addData
@@ -62,11 +84,11 @@ class CommonModel extends Model
 
 
     /* * *********************************************************************
-	 * * Function name : editData
-	 * * Developed By : Manoj Kumar
-	 * * Purpose  : This function used for edit data
-	 * * Date : 23 JUNE 2022
-	 * * **********************************************************************/
+     * * Function name : editData
+     * * Developed By : Manoj Kumar
+     * * Purpose  : This function used for edit data
+     * * Date : 23 JUNE 2022
+     * * **********************************************************************/
     public function editData($tableName = '', $param = [], $fieldName = '', $fieldValue = '')
     {
         try {
@@ -130,7 +152,7 @@ class CommonModel extends Model
             $builder->where('artist_id', $_GET['artist_id']);
         }
         if (isset($_GET['status']) && $_GET['status'] != 100) {
-            $builder->where('is_active', (string)$_GET['status']);
+            $builder->where('is_active', (string) $_GET['status']);
         }
         if (!empty($_GET['start_date'])) {
             $builder->where('start_date >=', $_GET['start_date']);
@@ -173,17 +195,23 @@ class CommonModel extends Model
         //   }
 
         // ✅ Apply LIKE conditions correctly
-        if (!empty($wcon['like']) && is_array($wcon['like'])) {
-            //  echo"<pre>";print_r($wcon['like']);die;
-            $builder->groupStart(); // Start a grouping for OR conditions
-            foreach ($wcon['like'] as $column => $value) {
-                $builder->orLike($column, $value);
+        if (!empty($wcon['where']) && is_array($wcon['where'])) {
+            foreach ($wcon['where'] as $condition) {
+                if (
+                    isset($condition['field'], $condition['op'], $condition['value']) &&
+                    $this->isValidField($condition['field']) &&
+                    in_array($condition['op'], ['=', '!=', '>', '<', '>=', '<='], true)
+                ) {
+                    $builder->where(
+                        $condition['field'] . ' ' . $condition['op'],
+                        $condition['value']
+                    );
+                }
             }
-            $builder->groupEnd(); // End grouping
         }
 
         // Sorting and Pagination
-        if (!empty($shortField)) {
+        if (!empty($shortField) && $this->isValidField($shortField)) {
             $builder->orderBy($shortField);
         }
         //   if (!empty($num_page)) {
@@ -295,13 +323,13 @@ class CommonModel extends Model
     }
 
 
-    public function    getMapLoc()
+    public function getMapLoc()
     {
         $query = $this->db->table('location_tbl')->where('is_active', 1)->get();
         $result = $query->getResultArray();
-        if ($result) :
+        if ($result):
             return $result;
-        else :
+        else:
             return false;
         endif;
     }
@@ -312,9 +340,9 @@ class CommonModel extends Model
     {
         $query = $this->db->table('festival_tbl')->where('is_active', 1)->get();
         $result = $query->getResultArray();
-        if ($result) :
+        if ($result):
             return $result;
-        else :
+        else:
             return false;
         endif;
     }
@@ -450,7 +478,7 @@ class CommonModel extends Model
             return [];
         }
 
-        return $query->getNumRows() > 0 ?  $query->getResultArray() : [];
+        return $query->getNumRows() > 0 ? $query->getResultArray() : [];
     }
 
     public function editDataByMultipleCondition(string $tableName, array $param, array $whereCondition)
@@ -478,7 +506,7 @@ class CommonModel extends Model
         $currentMonth = date('m');
         $currentYear = date('Y');
         $startDate = date('Y-m-01'); // First day of current month
-        $endDate   = date('Y-m-t');
+        $endDate = date('Y-m-t');
         log_message("info", "currentMonth: $currentMonth");
         log_message("info", "currentYear: $currentYear");
         log_message("debug", "StartDate: $startDate");
@@ -501,7 +529,7 @@ class CommonModel extends Model
         $currentYear = date('Y');
 
         $startDate = date('Y-m-01'); // First day of current month
-        $endDate   = date('Y-m-t');
+        $endDate = date('Y-m-t');
 
         return $this->db->table('event_tbl')
             ->select('event_id')
@@ -525,7 +553,7 @@ class CommonModel extends Model
         $currentYear = date('Y');
 
         $startDate = date('Y-m-01'); // First day of current month
-        $endDate   = date('Y-m-t');
+        $endDate = date('Y-m-t');
 
         return $this->db->table('admin')
             ->select('admin_id')
@@ -667,7 +695,7 @@ class CommonModel extends Model
         $builder->orderBy('venue_tbl.position', 'asc');
 
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
         // Execute Query
@@ -940,12 +968,12 @@ class CommonModel extends Model
 
     public function totalFestivals()
     {
-        $query =  $this->db->table('festival_tbl')->select('festival_id')->get();
+        $query = $this->db->table('festival_tbl')->select('festival_id')->get();
         $result = $query->getResult();
 
-        if ($result) :
+        if ($result):
             return $result;
-        else :
+        else:
             return false;
         endif;
     }
@@ -957,9 +985,9 @@ class CommonModel extends Model
             ->where('is_active', '2')
             ->get();
 
-        if ($query->getNumRows() > 0) : // ✅ Use `getNumRows()` in CI4
+        if ($query->getNumRows() > 0):  // ✅ Use `getNumRows()` in CI4
             return $query->getResult();
-        else :
+        else:
             return false;
         endif;
     }
@@ -1032,8 +1060,8 @@ class CommonModel extends Model
         // 	endforeach;
         // endif;
 
-        if (isset($wcon['where_gte']) && !empty($wcon['where_gte']) && is_array($wcon['where_gte'])) :
-            foreach ($wcon['where_gte'] as $whereGteData) :
+        if (isset($wcon['where_gte']) && !empty($wcon['where_gte']) && is_array($wcon['where_gte'])):
+            foreach ($wcon['where_gte'] as $whereGteData):
                 if ($this->isValidField($whereGteData[0])) {
                     if ($this->isValidField($whereGteData[0])) {
                         $builder->where("{$whereGteData[0]} >=", $whereGteData[1]);
@@ -1056,7 +1084,7 @@ class CommonModel extends Model
 
 
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
 
@@ -1064,13 +1092,13 @@ class CommonModel extends Model
         $query = $builder->get();
 
         // ✅ Handle response based on `$action`
-        if ($action == 'count') :
+        if ($action == 'count'):
             return $query->getNumRows(); // ✅ `getNumRows()` replaces `num_rows()` in CI4
-        elseif ($action == 'single') :
+        elseif ($action == 'single'):
             return ($query->getNumRows() > 0) ? $query->getRowArray() : false; // ✅ `getRowArray()` replaces `row_array()`
-        elseif ($action == 'multiple') :
+        elseif ($action == 'multiple'):
             return ($query->getNumRows() > 0) ? $query->getResultArray() : false; // ✅ `getResultArray()` replaces `result_array()`
-        else :
+        else:
             return false;
         endif;
     }
@@ -1126,7 +1154,7 @@ class CommonModel extends Model
 
 
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
         $query = $builder->get();
@@ -1192,7 +1220,7 @@ class CommonModel extends Model
 
 
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
         $query = $builder->get();
@@ -1241,7 +1269,7 @@ class CommonModel extends Model
             $builder->where("event_tbl.end_date <=", $request->getGet('end_date')); // ✅ Use actual table name
         }
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
         $query = $builder->get();
@@ -1474,7 +1502,7 @@ class CommonModel extends Model
         }
 
         if (!empty($num_page)) {
-            $builder->limit((int)$num_page, (int)$cnt); // ✅ Convert to integer before using
+            $builder->limit((int) $num_page, (int) $cnt); // ✅ Convert to integer before using
         }
 
         $query = $builder->get();
@@ -1804,15 +1832,29 @@ class CommonModel extends Model
         return $query->getResultArray(); // Fetch results as an array
     }
 
-    public function getDataByCondition($table, $conditions)
+    public function getDataByCondition(string $table, array $conditions)
     {
-        $builder = $this->db->table($table);
-        $builder->where($conditions);
-        $query = $builder->get();
-        $result = $query->getResultArray();
+        $allowedColumns = $this->getTableColumns($table);
 
-        return $result ?: false;
+        $safeConditions = [];
+
+        foreach ($conditions as $column => $value) {
+            if (in_array($column, $allowedColumns, true)) {
+                $safeConditions[$column] = $value;
+            }
+        }
+
+        if (empty($safeConditions)) {
+            return false;
+        }
+
+        return $this->db
+            ->table($table)
+            ->where($safeConditions)
+            ->get()
+            ->getResultArray() ?: false;
     }
+
     public function getUpdateOldEvents($thirtyDaysAgo, $currentDate)
     {
         log_message("info", "getupdate old events");
@@ -2085,7 +2127,7 @@ class CommonModel extends Model
             $sortParts = explode(' ', trim($shortField));
             $column = $sortParts[0] ?? '';
             $direction = strtoupper($sortParts[1] ?? 'ASC');
-        
+
             if (isset($this->allowedFieldsMap[$column]) && in_array($direction, ['ASC', 'DESC'], true)) {
                 $builder->orderBy($this->allowedFieldsMap[$column], $direction);
             }
