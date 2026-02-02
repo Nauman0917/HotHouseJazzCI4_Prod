@@ -231,8 +231,12 @@
               <?php /* ?><h5 class="m-b-10">Welcome <?=sessionData('ILCADM_ADMIN_FIRST_NAME')?></h5><?php */ ?>
             </div>
             <ul class="breadcrumb">
-              <li class="breadcrumb-item"><a href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>">Voted Baltimore List</a></li>
-              <li class="breadcrumb-item"><a href="javascript:void(0);"><?= isset($EDITDATA) && $EDITDATA ? 'Edit' : 'Add' ?> Voted Baltimore Content</a></li>
+              <li class="breadcrumb-item"><a
+                  href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>">Voted
+                  Baltimore List</a></li>
+              <li class="breadcrumb-item"><a
+                  href="javascript:void(0);"><?= isset($EDITDATA) && $EDITDATA ? 'Edit' : 'Add' ?> Voted Baltimore
+                  Content</a></li>
             </ul>
           </div>
         </div>
@@ -249,51 +253,80 @@
           <div class="card-body">
 
             <div class="basic-login-inner">
-              <form id="currentPageFormSubadmin" name="currentPageFormSubadmin" class="form-auth-small" method="post" action="" enctype="multipart/form-data">
+              <form id="currentPageFormSubadmin" name="currentPageFormSubadmin" class="form-auth-small" method="post"
+                action="" enctype="multipart/form-data">
                 <?php
-                  $errors = session('errors') ?? [];
+                $errors = session('errors') ?? [];
                 ?>
                 <?= csrf_field() ?>
                 <div class="row">
                   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <a href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>" style="margin-left: 12px;" class="btn btn-sm btn-primary pull-right">Back</a>
-                    <button class="btn btn-primary  btn-sm pull-right">Submit</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <a href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>" style="margin-right: 11px;" class="btn btn-danger has-ripple btn-sm pull-right">Cancel</a>
+                    <a href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>"
+                      style="margin-left: 12px;" class="btn btn-sm btn-primary pull-right">Back</a>
+                    <button
+                      class="btn btn-primary  btn-sm pull-right">Submit</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="<?php echo correctLink('webinarILCADMData', getCurrentControllerPath('index')); ?>"
+                      style="margin-right: 11px;" class="btn btn-danger has-ripple btn-sm pull-right">Cancel</a>
 
                     <input type="hidden" name="CurrentFieldForUnique" id="CurrentFieldForUnique" value="id" />
-                    <input type="hidden" name="CurrentIdForUnique" id="CurrentIdForUnique" value="<?= isset($EDITDATA) && $EDITDATA['id'] ?>" />
-                    <input type="hidden" name="CurrentDataID" id="CurrentDataID" value="<?= isset($EDITDATA) && $EDITDATA['id'] ?>" />
+                    <input type="hidden" name="CurrentIdForUnique" id="CurrentIdForUnique"
+                      value="<?= isset($EDITDATA) && $EDITDATA['id'] ?>" />
+                    <input type="hidden" name="CurrentDataID" id="CurrentDataID"
+                      value="<?= isset($EDITDATA) && $EDITDATA['id'] ?>" />
                     <input type="hidden" name="<?= csrf_token(); ?>" value="<?= csrf_hash(); ?>">
                   </div>
                 </div>
 
 
                 <div class="row">
-                  <div class="form-group-inner col-lg-6 col-md-8 col-sm-12 col-xs-12  <?= isset($errors['venue_title']) ? 'error' : '' ?>">
+                  <div
+                    class="form-group-inner col-lg-6 col-md-8 col-sm-12 col-xs-12  <?= isset($errors['venue_title']) ? 'error' : '' ?>">
                     <label>Venue Title<span class="required">*</span></label>
-                    <input type="text" name="venue_title" id="venue_title" value="<?= old('venue_title') ? old('venue_title') : (isset($EDITDATA['venue_title']) ? stripslashes($EDITDATA['venue_title']) : '') ?>" class="form-control required" placeholder="Venue Title">
-                    <?php if (isset($errors['venue_title'])) : ?>
-                      <span for="venue_title" generated="true" class="help-inline"><?= esc($errors['venue_title']); ?></span>
+                    <input type="text" name="venue_title" id="venue_title"
+                      value="<?= old('venue_title') ? old('venue_title') : (isset($EDITDATA['venue_title']) ? stripslashes($EDITDATA['venue_title']) : '') ?>"
+                      class="form-control required" placeholder="Venue Title">
+                    <?php if (isset($errors['venue_title'])): ?>
+                      <span for="venue_title" generated="true"
+                        class="help-inline"><?= esc($errors['venue_title']); ?></span>
                     <?php endif; ?>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="form-group-inner col-lg-6 col-md-8 col-sm-12 col-xs-12 <?= isset($errors['position']) ? 'error' : '' ?>">
+                  <div
+                    class="form-group-inner col-lg-6 col-md-8 col-sm-12 col-xs-12 <?= isset($errors['position']) ? 'error' : '' ?>">
                     <label>Venue Position<span class="required">*</span></label>
-                    <input type="number" min="0" step="1" name="position" id="position" value="<?= old('venue_title') ? old('position') : (isset($EDITDATA['position']) ? stripslashes($EDITDATA['position']) : '') ?>" class="form-control required" placeholder="Venue Position">
-                    <?php if (isset($errors['position'])) : ?>
+                    <input type="number" min="0" step="1" name="position" id="position"
+                      value="<?= old('venue_title') ? old('position') : (isset($EDITDATA['position']) ? stripslashes($EDITDATA['position']) : '') ?>"
+                      class="form-control required" placeholder="Venue Position">
+                    <?php if (isset($errors['position'])): ?>
                       <span for="position" generated="true" class="help-inline"><?= esc($errors['position']); ?></span>
                     <?php endif; ?>
                   </div>
                 </div>
                 <div class="row">
-                  <div class="form-group-inner col-lg-4 col-md-3 col-sm-3 col-xs-12 <?= isset($errors['image']) ? 'error' : '' ?>">
-                    <div class="animation">
+                  <div
+                    class="form-group-inner col-lg-6 col-md-8 col-sm-12 col-xs-12 <?= isset($errors['website']) ? 'error' : '' ?>">
+                    <label>Venue Website</label>
+                    <input type="text" name="website" id="website"
+                      value="<?= old('website') ? old('website') : (isset($EDITDATA['website']) ? stripslashes($EDITDATA['website']) : '') ?>"
+                      class="form-control" placeholder="Venue Website">
+                    <?php if (isset($errors['website'])): ?>
+                      <span for="website" generated="true" class="help-inline"><?= esc($errors['website']); ?></span>
+                    <?php endif; ?>
+
+                  </div>
+                </div>
+                <div class="row">
+                  <div
+                    class="form-group-inner col-lg-4 col-md-3 col-sm-3 col-xs-12 <?= isset($errors['image']) ? 'error' : '' ?>">
+                    <div class="animation d-flex flex-column">
                       <label>Image<span class="required">*</span></label>
-                      <input value="<?= old('image') ? old('image') : (isset($EDITDATA['image']) ? stripslashes($EDITDATA['image']) : '') ?>" id="uploadFile" name="image" class="f-input" readonly />
+                      <input
+                        value="<?= old('image') ? old('image') : (isset($EDITDATA['image']) ? stripslashes($EDITDATA['image']) : '') ?>"
+                        id="uploadFile" name="image" class="f-input" readonly />
                       <p style="font-family:italic; color:red;">[Image Size : 521 x 309 px in jpg/png/gif/jpeg/webp]</p>
                     </div>
-                    <?php if (isset($errors['image'])) : ?>
+                    <?php if (isset($errors['image'])): ?>
                       <span for="image" generated="true" class="help-inline mt-0"><?= esc($errors['image']); ?></span>
                     <?php endif; ?>
 
@@ -310,7 +343,8 @@
                   <div class="login-btn-inner col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="inline-remember-me mt-4">
                       <input type="hidden" name="SaveChanges" id="SaveChanges" value="Yes">
-                      <span class="tools pull-right">Note:- <strong><span style="color:#FF0000;">*</span> Indicates Required Fields</strong> </span>
+                      <span class="tools pull-right">Note:- <strong><span style="color:#FF0000;">*</span> Indicates
+                          Required Fields</strong> </span>
                     </div>
                   </div>
                 </div>
@@ -357,7 +391,7 @@
   </div>
 </div>
 <script type="text/javascript">
-  $(document).ready(function() {
+  $(document).ready(function () {
 
     var $modal = $('#modal');
 
@@ -365,46 +399,46 @@
 
     var cropper;
 
-    $('#upload_image').change(function(event) {
+    $('#upload_image').change(function (event) {
       var files = event.target.files;
 
-      var done = function(url) {
+      var done = function (url) {
         image.src = url;
         $modal.modal('show');
       };
 
       if (files && files.length > 0) {
         reader = new FileReader();
-        reader.onload = function(event) {
+        reader.onload = function (event) {
           done(reader.result);
         };
         reader.readAsDataURL(files[0]);
       }
     });
 
-    $modal.on('shown.bs.modal', function() {
+    $modal.on('shown.bs.modal', function () {
       cropper = new Cropper(image, {
         aspectRatio: 2,
         viewMode: 3,
         preview: '.preview'
       });
-    }).on('hidden.bs.modal', function() {
+    }).on('hidden.bs.modal', function () {
       cropper.destroy();
       cropper = null;
     });
 
-    $('#crop').click(function() {
+    $('#crop').click(function () {
       canvas = cropper.getCroppedCanvas({
         width: 1022,
         height: 412
       });
 
-      canvas.toBlob(function(blob) {
+      canvas.toBlob(function (blob) {
         url = URL.createObjectURL(blob);
 
         var reader = new FileReader();
         reader.readAsDataURL(blob);
-        reader.onloadend = function() {
+        reader.onloadend = function () {
           var data = reader.result;
           var base64data = reader.result;
 
@@ -421,7 +455,7 @@
   });
 </script>
 <script>
-  $("#page_section").change(function() {
+  $("#page_section").change(function () {
     var selectedVal = $(this).val();
 
     if (selectedVal == "about") {
@@ -434,7 +468,7 @@
   });
 </script>
 <script>
-  document.getElementById("uploadBtn").onchange = function() {
+  document.getElementById("uploadBtn").onchange = function () {
     document.getElementById("uploadFile").value = this.value.replace("C:\\fakepath\\", "");
   };
 </script>
